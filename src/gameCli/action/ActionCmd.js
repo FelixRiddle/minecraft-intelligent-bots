@@ -20,8 +20,6 @@ export default class ActionCmd {
         
         // Next arg
         const arg = args[0];
-        console.log(`Args: `, args);
-        console.log(`Arg: `, arg);
         
         if(arg === "dig") {
             const nextArg = args[1];
@@ -60,7 +58,9 @@ export default class ActionCmd {
                 this.jumpAndPlaceBlock();
             }
         } else if(arg === "equipandplace") {
-            io.setOk().msg("Equip and place");
+            if(this.debug) {
+                io.setOk().msg("Equip and place");
+            }
             // Equip a block and place on the spot
             if(args.length > 1) {
                 const nextArg = args[1];
@@ -76,12 +76,20 @@ export default class ActionCmd {
         const bot = this.bot;
         const io = this.io;
         
-        const blockType = bot.registry.blocksByName[blockName];
-        console.log(`Block type: `, blockType);
+        let itemsByName = undefined;
+        if (this.bot.supportFeature('itemsAreNotBlocks')) {
+            itemsByName = 'itemsByName';
+        } else if (this.bot.supportFeature('itemsAreAlsoBlocks')) {
+            itemsByName = 'blocksByName';
+        }
+        
+        const blockType = this.bot.registry[itemsByName][blockName];
         (async () => {
             try {
                 await bot.equip(blockType.id, 'hand');
-                io.setOk().msg('Equipped block');
+                if(this.debug) {
+                    io.setOk().msg('Equipped block');
+                }
             
                 this.jumpAndPlaceBlock();
             } catch (err) {
@@ -103,6 +111,7 @@ export default class ActionCmd {
         this.bot.setControlState('jump', true);
         bot.on('move', placeIfHighEnough);
         
+        let once = true;
         let tryCount = 0;
         async function placeIfHighEnough () {
             // If the player is high enough to place the block do it
@@ -111,7 +120,11 @@ export default class ActionCmd {
                     await bot.placeBlock(referenceBlock, vec3(0, 1, 0));
                     bot.setControlState('jump', false);
                     bot.removeListener('move', placeIfHighEnough);
-                    io.setOk().msg('Placing a block was successful');
+                    
+                    if(once) {
+                        io.setOk().msg('Placing a block was successful');
+                        once = false;
+                    }
                 } catch (err) {
                     tryCount++;
                     if (tryCount > 10) {

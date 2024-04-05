@@ -10,6 +10,7 @@ import InventoryCmd from "./inventory/InventoryCmd.js";
  * In-game cli with commands and stuff
  */
 export default class GameCLI {
+    debug = false;
     
     /**
      * 
