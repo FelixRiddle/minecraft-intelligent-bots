@@ -2,11 +2,9 @@
 // My library hast to be singular compared to the many 'bridges'
 // This is a concept I often fail to realize
 import mineflayer from "mineflayer";
-import { mineflayer as mineflayerViewer } from "prismarine-viewer";
+// import { mineflayer as mineflayerViewer } from "prismarine-viewer";
 import Pathfinder, { pathfinder, Movements } from 'mineflayer-pathfinder';
 import { plugin as AutoEat } from "mineflayer-auto-eat";
-
-import MessagePlayer from "./MessagePlayer.js";
 
 const { GoalNear } = Pathfinder.goals;
 

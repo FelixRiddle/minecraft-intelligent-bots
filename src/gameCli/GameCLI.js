@@ -1,6 +1,7 @@
 import MessagePlayer from "../MessagePlayer.js";
 
 import Minion from '../Minion.js';
+import ActionCmd from "./action/ActionCmd.js";
 
 /**
  * Game cli
@@ -39,23 +40,29 @@ export default class GameCLI {
                 // Split by spaces
                 const args = msg.split(" ");
                 const cmd = args[0];
-                if(msg === "come") {
+                if(cmd === "action") {
+                    const newArgs = args.filter((item, index) => index > 0);
+                    console.log(`New args: `, newArgs);
+                    const action = new ActionCmd(bot, msgPlayer, newArgs);
+                    
+                    msgPlayer.setOk().msg("Performing action");
+                } else if(cmd === "come") {
                     msgPlayer.setOk().msg("Going towards the player");
                     
                     this.minion.goToPlayer(player);
-                } else if(msg === "dh" || msg === "dHealth" || msg === "displayHealth") {
+                } else if(cmd === "dh" || cmd === "dHealth" || cmd === "displayHealth") {
                     const remaining = bot.health;
                     
                     const health = this.displayRemainingStat(remaining);
                     
                     msgPlayer.setOk().msg(`My Health is: [${health}](${remaining.toPrecision(2)})`);
-                } else if(msg === "dhun" || msg === "displayHunger") {
+                } else if(cmd === "dhun" || cmd === "displayHunger") {
                     const remaining = bot.food;
                     
                     const hunger = this.displayRemainingStat(remaining);
                     
                     msgPlayer.setOk().msg(`My Hunger is: [${hunger}](${remaining.toPrecision(2)})`);
-                } else if(msg === "follow") {
+                } else if(cmd === "follow") {
                     // Enable the first bit
                     this.minion.toggleFollowPlayer();
                     
@@ -66,10 +73,10 @@ export default class GameCLI {
                         msg = "has stopped following the player.";
                     }
                     msgPlayer.setOk().msg(`'${this.bot.username}' ${msg}`);
-                } else if(msg.startsWith("go")) {
+                } else if(cmd.startsWith("go")) {
                     // Go do something
                     // Go to direction
-                } else if(msg.startsWith("help")) {
+                } else if(cmd.startsWith("help")) {
                     // Show commands by page
                 } else if(cmd === "list") {
                     const arg = args[1];
@@ -82,15 +89,15 @@ export default class GameCLI {
                         const out = `[${output}]`;
                         msgPlayer.setOk().msg(out);
                     }
-                } else if(msg.startsWith("setRole")) {
+                } else if(cmd.startsWith("setRole")) {
                     // Set role
                     // E.g: Lumberjack, Miner, Reconnaissance / Probing, Protect, Attack
-                } else if(msg.startsWith("stop")) {
+                } else if(cmd.startsWith("stop")) {
                     const arg = args[1];
-                    if(cmd === "follow") {
+                    if(arg === "follow") {
                         // Stop following the player
                     }
-                } else if(msg.startsWith("guard")) {
+                } else if(cmd.startsWith("guard")) {
                     // Guard an area, attack anything that comes in
                     
                     // Remember to go back to the starting point
