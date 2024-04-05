@@ -19,6 +19,9 @@ import { bit_toggle, bit_test } from "./bit.js";
  * - Go to player
  */
 export default class Bot {
+    // Timers
+    followPlayerTimerFlag = null;
+    
     commanderUsername = "";
     debug = true;
     actions = 0;
@@ -87,8 +90,31 @@ export default class Bot {
                 if(this.debug) {
                     console.log(`Player missing some points of food`);
                 }
-                bot.autoEat.enable();
-                bot.autoEat.eat(true);
+                try {
+                    bot.autoEat.enable();
+                    // bot.autoEat.eat(true);
+                } catch(err) {
+                    if(this.debug) {
+                        console.error(err);
+                    }
+                }
+            }
+        });
+        
+        // When an entity moves
+        bot.on('entityMoved', (entity) => {
+            // Check if it's the player
+            if(entity.type === "player" && entity.username === this.commanderUsername) {
+                const player = entity;
+                // Check if follow player is activated
+                if(this.followPlayer()) {
+                    // Big mistake I made
+                    // this.throttleFollowPlayer(this.goToPlayer(player, 5));
+                    // Correct way
+                    // Because the function must be called internally
+                    const obj = this;
+                    this.throttleFollowPlayer(() => obj.goToPlayer(player, 5), 1000 * 3);
+                }
             }
         });
         
@@ -112,16 +138,7 @@ export default class Bot {
                 if(msg.startsWith("come")) {
                     msgPlayer.setOk().msg("Going towards the player");
                     
-                    // Get close to the player
-                    const RANGE_GOAL = 0;
-                    
-                    // Get player position
-                    const { x: playerX, y: playerY, z: playerZ } = player.position;
-                    
-                    // Walk towards the player
-                    const defaultMove = new Movements(bot)
-                    bot.pathfinder.setMovements(defaultMove);
-                    bot.pathfinder.setGoal(new GoalNear(playerX, playerY, playerZ, RANGE_GOAL));
+                    this.goToPlayer(player);
                 } else if(msg === "dh" || msg === "dHealth" || msg === "displayHealth") {
                     const remaining = bot.health;
                     
@@ -176,6 +193,15 @@ export default class Bot {
     }
     
     /**
+     * Is following the player?
+     * 
+     * @returns 
+     */
+    followPlayer() {
+        return bit_test(this.actions, 0);
+    }
+    
+    /**
      * Nice chat view of a stat
      * 
      * For Hunger or Health only
@@ -201,9 +227,38 @@ export default class Bot {
     }
     
     /**
+     * Follow player must be throttled because when the player moves too much, the bot follows slowly.
      * 
+     * One of the functions to go to the player is quite slow, but that's fine, we fix it by just throttling.
+     * 
+     * @param {*} mainFunction 
+     * @param {*} delay In ms
+     * @returns 
      */
-    goToPlayer() {
+    throttleFollowPlayer(mainFunction, delay = 1000) {
+        // If there is no timer currently running
+        if (this.followPlayerTimerFlag === null) {
+            // Execute the main function
+            mainFunction();
+            
+            // Set a timer to clear the timerFlag after the specified delay
+            this.followPlayerTimerFlag = setTimeout(() => {
+                // Clear the timerFlag to allow the main function to be executed again
+                this.followPlayerTimerFlag = null;
+            }, delay);
+        }
+    }
+    
+    /**
+     * Go to a given player
+     */
+    goToPlayer(player, range = 1) {
+        // Get player position
+        const { x: playerX, y: playerY, z: playerZ } = player.position;
         
+        // Walk towards the player
+        const defaultMove = new Movements(this.bot);
+        this.bot.pathfinder.setMovements(defaultMove);
+        this.bot.pathfinder.setGoal(new GoalNear(playerX, playerY, playerZ, range));
     }
 }
