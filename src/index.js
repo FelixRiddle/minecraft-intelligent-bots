@@ -1,5 +1,5 @@
 // Create a bot
-import Bot from "./Bot.js";
+import Minion from "./Minion.js";
 
-const bot = new Bot("fr3dericc");
+const minion = new Minion("fr3dericc");
 

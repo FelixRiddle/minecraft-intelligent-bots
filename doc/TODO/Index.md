@@ -10,6 +10,7 @@ Go to player
 
 - [x] 'dhun' Display hunger
 
-- [ ] 'follow' command
+- [x] 'follow' command
 
 Follows the player
+To stop following send follow again.
