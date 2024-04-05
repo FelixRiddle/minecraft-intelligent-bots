@@ -1,0 +1,22 @@
+{
+  "name": "minecraft-intelligent-bots",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon ./src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mineflayer": "^4.20.0",
+    "mineflayer-pathfinder": "^2.4.5",
+    "prismarine-viewer": "^1.28.0"
+  },
+  "devDependencies": {
+    "argparse": "^2.0.1",
+    "nodemon": "^3.1.0"
+  }
+}
