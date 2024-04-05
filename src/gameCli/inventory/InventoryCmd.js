@@ -57,5 +57,5 @@ export default class InventoryCmd {
         } catch (err) {
             this.io.setError().msg(`unable to equip dirt: ${err.message}`);
         }
-      }
+    }
 }
