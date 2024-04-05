@@ -2,6 +2,7 @@ import MessagePlayer from "../MessagePlayer.js";
 
 import Minion from '../Minion.js';
 import ActionCmd from "./action/ActionCmd.js";
+import InventoryCmd from "./inventory/InventoryCmd.js";
 
 /**
  * Game cli
@@ -39,11 +40,13 @@ export default class GameCLI {
                 // Get args
                 // Split by spaces
                 const args = msg.split(" ");
+                
+                // Args for the next command in chain
+                const nextArgs = args.filter((item, index) => index > 0);
+                
                 const cmd = args[0];
                 if(cmd === "action") {
-                    const newArgs = args.filter((item, index) => index > 0);
-                    console.log(`New args: `, newArgs);
-                    const action = new ActionCmd(bot, msgPlayer, newArgs);
+                    const action = new ActionCmd(bot, msgPlayer, nextArgs);
                     
                     msgPlayer.setOk().msg("Performing action");
                 } else if(cmd === "come") {
@@ -73,11 +76,13 @@ export default class GameCLI {
                         msg = "has stopped following the player.";
                     }
                     msgPlayer.setOk().msg(`'${this.bot.username}' ${msg}`);
-                } else if(cmd.startsWith("go")) {
+                } else if(cmd === "go") {
                     // Go do something
                     // Go to direction
-                } else if(cmd.startsWith("help")) {
+                } else if(cmd === "help") {
                     // Show commands by page
+                } else if(cmd === "inv") {
+                    const inv = new InventoryCmd(bot, msgPlayer, nextArgs);
                 } else if(cmd === "list") {
                     const arg = args[1];
                     if(arg === "items") {
