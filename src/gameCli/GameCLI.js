@@ -47,8 +47,6 @@ export default class GameCLI {
                 const cmd = args[0];
                 if(cmd === "action") {
                     const action = new ActionCmd(bot, msgPlayer, nextArgs);
-                    
-                    msgPlayer.setOk().msg("Performing action");
                 } else if(cmd === "come") {
                     msgPlayer.setOk().msg("Going towards the player");
                     

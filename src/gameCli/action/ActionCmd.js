@@ -1,3 +1,5 @@
+import vec3 from "vec3";
+
 import MessagePlayer from "../../MessagePlayer.js";
 
 /**
@@ -14,13 +16,13 @@ export default class ActionCmd {
      */
     constructor(bot, io, args) {
         this.bot = bot;
+        this.io = io;
         
         // Next arg
         const arg = args[0];
         if(arg === "dig") {
             const nextArg = args[1];
             if(nextArg === "down") {
-                io.setOk().msg("Digging one block down.");
                 let target = undefined;
                 
                 if (bot.targetDigBlock) {
@@ -47,6 +49,34 @@ export default class ActionCmd {
                             io.msg('Cannot dig');
                         }
                     })();
+                }
+            }
+        } else if(arg === "build") {
+            const nextArg = args[1];
+            if(nextArg === "down") {
+                const referenceBlock = bot.blockAt(bot.entity.position.offset(0, -1, 0));
+                const jumpY = Math.floor(bot.entity.position.y) + 1.0;
+                bot.setControlState('jump', true);
+                bot.on('move', placeIfHighEnough);
+                
+                let tryCount = 0;
+                async function placeIfHighEnough () {
+                    // If the player is high enough to place the block do it
+                    if (bot.entity.position.y > jumpY) {
+                        try {
+                            await bot.placeBlock(referenceBlock, vec3(0, 1, 0));
+                            bot.setControlState('jump', false);
+                            bot.removeListener('move', placeIfHighEnough);
+                            io.setOk().msg('Placing a block was successful');
+                        } catch (err) {
+                            tryCount++;
+                            if (tryCount > 10) {
+                                io.setError().msg(err.message);
+                                bot.setControlState('jump', false);
+                                bot.removeListener('move', placeIfHighEnough);
+                            }
+                        }
+                    }
                 }
             }
         }
