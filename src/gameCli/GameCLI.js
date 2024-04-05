@@ -34,7 +34,12 @@ export default class GameCLI {
                 // Commands
                 // Case insensitive
                 const msg = message.toLowerCase();
-                if(msg.startsWith("come")) {
+                
+                // Get args
+                // Split by spaces
+                const args = msg.split(" ");
+                const cmd = args[0];
+                if(msg === "come") {
                     msgPlayer.setOk().msg("Going towards the player");
                     
                     this.minion.goToPlayer(player);
@@ -66,15 +71,22 @@ export default class GameCLI {
                     // Go to direction
                 } else if(msg.startsWith("help")) {
                     // Show commands by page
+                } else if(cmd === "list") {
+                    const arg = args[1];
+                    if(arg === "items") {
+                        // List items
+                        const items = this.bot.inventory.items();
+                        const output = items
+                            .map((item) => `${item.displayName}(${item.count})`)
+                            .join(', ');
+                        const out = `[${output}]`;
+                        msgPlayer.setOk().msg(out);
+                    }
                 } else if(msg.startsWith("setRole")) {
                     // Set role
                     // E.g: Lumberjack, Miner, Reconnaissance / Probing, Protect, Attack
                 } else if(msg.startsWith("stop")) {
-                    // Get args
-                    const args = msg.split(" ");
-                    
-                    // Next cbotommand
-                    const cmd = args[1];
+                    const arg = args[1];
                     if(cmd === "follow") {
                         // Stop following the player
                     }

@@ -14,3 +14,7 @@ Go to player
 
 Follows the player
 To stop following send follow again.
+
+- [x] 'list items'
+
+To list items
