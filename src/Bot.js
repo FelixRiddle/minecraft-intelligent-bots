@@ -10,6 +10,8 @@ import MessagePlayer from "./MessagePlayer.js";
 
 const { GoalNear } = Pathfinder.goals;
 
+import { bit_toggle, bit_test } from "./bit.js";
+
 /**
  * Very high level api
  * 
@@ -19,6 +21,7 @@ const { GoalNear } = Pathfinder.goals;
 export default class Bot {
     commanderUsername = "";
     debug = true;
+    actions = 0;
     
     /**
      * 
@@ -90,8 +93,6 @@ export default class Bot {
         });
         
         // --- Commands ---
-        // Get close to the player
-        const RANGE_GOAL = 0;
         // The user sends a command to the bot, only if the name is mine
         bot.on('whisper', (username, message) => {
             
@@ -110,6 +111,9 @@ export default class Bot {
                 const msg = message.toLowerCase();
                 if(msg.startsWith("come")) {
                     msgPlayer.setOk().msg("Going towards the player");
+                    
+                    // Get close to the player
+                    const RANGE_GOAL = 0;
                     
                     // Get player position
                     const { x: playerX, y: playerY, z: playerZ } = player.position;
@@ -130,6 +134,17 @@ export default class Bot {
                     const hunger = this.displayRemainingStat(remaining);
                     
                     msgPlayer.setOk().msg(`My Hunger is: [${hunger}](${remaining.toPrecision(2)})`);
+                } else if(msg === "follow") {
+                    // Enable the first bit
+                    this.actions = bit_toggle(this.actions, 0);
+                    
+                    let msg = "";
+                    if(bit_test(this.actions, 0)) {
+                        msg = "is following the player.";
+                    } else {
+                        msg = "has stopped following the player.";
+                    }
+                    msgPlayer.setOk().msg(`'${this.bot.username}' ${msg}`);
                 } else if(msg.startsWith("go")) {
                     // Go do something
                     // Go to direction
@@ -138,6 +153,15 @@ export default class Bot {
                 } else if(msg.startsWith("setRole")) {
                     // Set role
                     // E.g: Lumberjack, Miner, Reconnaissance / Probing, Protect, Attack
+                } else if(msg.startsWith("stop")) {
+                    // Get args
+                    const args = msg.split(" ");
+                    
+                    // Next command
+                    const cmd = args[1];
+                    if(cmd === "follow") {
+                        // Stop following the player
+                    }
                 } else if(msg.startsWith("guard")) {
                     // Guard an area, attack anything that comes in
                     
