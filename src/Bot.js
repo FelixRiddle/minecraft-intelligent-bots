@@ -18,6 +18,7 @@ const { GoalNear } = Pathfinder.goals;
  */
 export default class Bot {
     commanderUsername = "";
+    debug = true;
     
     /**
      * 
@@ -75,15 +76,22 @@ export default class Bot {
         bot.on('health', () => {
             // Autoeat
             if(bot.food === 20) {
+                if(this.debug) {
+                    console.log(`Player full food`);
+                }
                 bot.autoEat.disable();
             } else {
+                if(this.debug) {
+                    console.log(`Player missing some points of food`);
+                }
                 bot.autoEat.enable();
+                bot.autoEat.eat(true);
             }
         });
         
         // --- Commands ---
         // Get close to the player
-        const RANGE_GOAL = 3;
+        const RANGE_GOAL = 0;
         // The user sends a command to the bot, only if the name is mine
         bot.on('whisper', (username, message) => {
             
@@ -111,9 +119,17 @@ export default class Bot {
                     bot.pathfinder.setMovements(defaultMove);
                     bot.pathfinder.setGoal(new GoalNear(playerX, playerY, playerZ, RANGE_GOAL));
                 } else if(msg === "dh" || msg === "dHealth" || msg === "displayHealth") {
-                    msgPlayer.setOk().msg(`My Health is: ${bot.health.toPrecision(2)}`);
+                    const remaining = bot.health;
+                    
+                    const health = this.displayRemainingStat(remaining);
+                    
+                    msgPlayer.setOk().msg(`My Health is: [${health}](${remaining.toPrecision(2)})`);
                 } else if(msg === "dhun" || msg === "displayHunger") {
-                    msgPlayer.setOk().msg(`My Hunger is: ${bot.food.toPrecision(2)}`);
+                    const remaining = bot.food;
+                    
+                    const hunger = this.displayRemainingStat(remaining);
+                    
+                    msgPlayer.setOk().msg(`My Hunger is: [${hunger}](${remaining.toPrecision(2)})`);
                 } else if(msg.startsWith("go")) {
                     // Go do something
                     // Go to direction
@@ -133,6 +149,31 @@ export default class Bot {
         });
                 
         this.bot = bot;
+    }
+    
+    /**
+     * Nice chat view of a stat
+     * 
+     * For Hunger or Health only
+     * 
+     * @param {*} current 
+     * @param {*} total 
+     * @returns 
+     */
+    displayRemainingStat(current, total = 20) {
+        let res = "";
+        for(let i = 0; i < current; i++) {
+            // If not even, is half hearth
+            res += "X"
+        }
+        if(current < total) {
+            const remaining = Math.floor(total - current);
+            for(let i = 0; i < remaining; i++) {
+                res += "-";
+            }
+        }
+        
+        return res;
     }
     
     /**
