@@ -4,6 +4,7 @@
 import mineflayer from "mineflayer";
 import { mineflayer as mineflayerViewer } from "prismarine-viewer";
 import Pathfinder, { pathfinder, Movements } from 'mineflayer-pathfinder';
+import { plugin as AutoEat } from "mineflayer-auto-eat";
 
 import MessagePlayer from "./MessagePlayer.js";
 
@@ -54,12 +55,40 @@ export default class Bot {
         bot.on('kicked', console.log);
         bot.on('error', console.log);
         
+        // Plugins
+        bot.loadPlugin(pathfinder);
+        bot.loadPlugin(AutoEat);
+        
+        // View player on the browser
+        bot.once('spawn', () => {
+            // Autoeat options
+            bot.autoEat.options = {
+                priority: 'foodPoints',
+                startAt: 14,
+                bannedFood: [],
+            };
+            
+            // Port is the minecraft server port
+            mineflayerViewer(bot, { port: 8001, firstPerson: true });
+        });
+        
+        bot.on('health', () => {
+            // Autoeat
+            if(bot.food === 20) {
+                bot.autoEat.disable();
+            } else {
+                bot.autoEat.enable();
+            }
+        });
+        
+        // --- Commands ---
         // Get close to the player
         const RANGE_GOAL = 3;
-        bot.loadPlugin(pathfinder);
         // The user sends a command to the bot, only if the name is mine
         bot.on('whisper', (username, message) => {
-            if(username === "fr3dericc") {
+            
+            // Commander username
+            if(username === this.commanderUsername) {
                 // Get player
                 const player = bot.players[username]?.entity;
                 const msgPlayer = new MessagePlayer(bot, username);
@@ -81,24 +110,26 @@ export default class Bot {
                     const defaultMove = new Movements(bot)
                     bot.pathfinder.setMovements(defaultMove);
                     bot.pathfinder.setGoal(new GoalNear(playerX, playerY, playerZ, RANGE_GOAL));
+                } else if(msg === "dh" || msg === "dHealth" || msg === "displayHealth") {
+                    msgPlayer.setOk().msg(`My Health is: ${bot.health.toPrecision(2)}`);
+                } else if(msg === "dhun" || msg === "displayHunger") {
+                    msgPlayer.setOk().msg(`My Hunger is: ${bot.food.toPrecision(2)}`);
                 } else if(msg.startsWith("go")) {
                     // Go do something
                     // Go to direction
+                } else if(msg.startsWith("help")) {
+                    // Show commands by page
                 } else if(msg.startsWith("setRole")) {
                     // Set role
                     // E.g: Lumberjack, Miner, Reconnaissance / Probing, Protect, Attack
+                } else if(msg.startsWith("guard")) {
+                    // Guard an area, attack anything that comes in
+                    
+                    // Remember to go back to the starting point
                 } else {
                     msgPlayer.msg("Command not found!");
                 }
             }
-        });
-        
-        // View player on the browser
-        bot.once('spawn', () => {
-            const defaultMove = new Movements(bot);
-            
-            // Port is the minecraft server port
-            mineflayerViewer(bot, { port: 8001, firstPerson: true });
         });
                 
         this.bot = bot;
