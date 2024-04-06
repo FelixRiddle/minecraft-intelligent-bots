@@ -1,7 +1,7 @@
 import MessagePlayer from "../MessagePlayer.js";
 
 import Minion from '../Minion.js';
-import CollectTree from "../actions/collect/CollectTree.js";
+import CollectTree from "../actions/collect/tree/CollectTree.js";
 import ActionCmd from "./action/ActionCmd.js";
 import InventoryCmd from "./inventory/InventoryCmd.js";
 

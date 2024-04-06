@@ -89,7 +89,7 @@ export default class Minion {
             }
             
             // If down by three hearths
-            if(bot.health <= 20 - 6) {
+            if(Math.floor(bot.health) <= 20 - 6) {
                 // And food is less than 18
                 if(bot.food < 18) {
                     console.log(`Has to eat, to recover life`);
