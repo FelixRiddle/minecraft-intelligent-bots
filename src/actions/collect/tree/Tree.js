@@ -3,6 +3,7 @@ import Pathfinder, { Movements } from 'mineflayer-pathfinder';
 import blockView, { arrBlockView } from "../../../view/block.js";
 import { saplingNameFromBlockName, treeLeaveNames } from "./index.js";
 import equipJumpAndPlaceBlock from '../../../operation/actions/equipJumpAndPlace.js';
+import equipItemByName from '../../../operation/inventory/equip/equipItemByName.js';
 
 const { GoalNear } = Pathfinder.goals;
 
@@ -213,11 +214,19 @@ export default class Tree {
                 console.log(`Logs: `, arrBlockView(logs));
             }
             
+            // Iterate over every log and break them all
             for(const log of logs) {
                 if(obj.debug) {
                     console.log(`Current log: `, blockView(log));
                 }
                 
+                // Equip best item for breaking the block first
+                // Which is an axe
+                const axe = obj.bot.pathfinder.bestHarvestTool(log);
+                equipItemByName(obj.bot, obj.io, axe.name);
+                
+                // Check if the block can be broken
+                // You can't break bedrock in survival
                 if (obj.bot.canDigBlock(log)) {
                     try {
                         await obj.bot.dig(log);
