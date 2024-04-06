@@ -29,29 +29,8 @@ export default class CollectTree {
         if(!tree) {
             this.io.error("Couldn't find a tree nearby!");
         } else {
-            // The class has bot inside, and it's too big to print
-            if(this.debug) {
-                console.log(`Tree: `, tree.position);
-            }
-            
-            const treePos = tree.position;
-            // Walk towards the player
-            const defaultMove = new Movements(this.bot);
-            this.bot.pathfinder.setMovements(defaultMove);
-            this.bot.pathfinder.setGoal(new GoalNear(treePos.x, treePos.y, treePos.z, 0));
-            
-            // Chop tree down
-            try {
-                if(this.debug) {
-                    console.log(`--- Finding tree logs ---`);
-                }
-                const logs = tree.treeLogs(2);
-                
-                console.log(`Logs: `, arrBlockView(logs));
-                
-            } catch(err) {
-                console.error(err);
-            }
+            // Break tree
+            tree.breakTree();
         }
     }
     
@@ -108,7 +87,6 @@ export default class CollectTree {
                 // Not a tree
             }
         }
-        // console.log(`Trees found nearby: `, treesFoundNearby);
         
         return treesFoundNearby;
     }
@@ -136,13 +114,6 @@ export default class CollectTree {
      * May throw an error if it's not a tree
      */
     tree(blockPosition) {
-        return Tree.fromSingleBlock(this.bot, blockPosition);
-    }
-    
-    /**
-     * Break tree
-     */
-    breakTree() {
-        
+        return Tree.fromSingleBlock(this.bot, this.io, blockPosition);
     }
 }

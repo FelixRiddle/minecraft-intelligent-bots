@@ -1,10 +1,16 @@
-import blockView from "../../../view/block.js";
+import Pathfinder, { Movements } from 'mineflayer-pathfinder';
+
+import blockView, { arrBlockView } from "../../../view/block.js";
 import { treeLeaveNames } from "./index.js";
+
+const { GoalNear } = Pathfinder.goals;
 
 /**
  * Tree class abstraction
  */
 export default class Tree {
+    debug = false;
+    moveTimerFlag = null;
     
     /**
      * Tree constructor
@@ -13,15 +19,16 @@ export default class Tree {
      * 
      * @param {*} bottomLogPosition 
      */
-    constructor(bot, bottomLogPosition) {
+    constructor(bot, io, bottomLogPosition) {
         this.bot = bot;
+        this.io = io;
         this.position = bottomLogPosition;
     }
     
     /**
      * Detect whole tree from a single block, throws error if it's not a tree
      */
-    static fromSingleBlock(bot, blockPosition) {
+    static fromSingleBlock(bot, io, blockPosition) {
         console.log(`--- Tree position ---`);
         
         if(!Tree.hasTopLeave(bot, blockPosition)) {
@@ -45,7 +52,7 @@ export default class Tree {
                     console.log(`First wood loc: `, currentBlockPosition);
                     console.log(`Dirt position: `, newBlock.position);
                 }
-                return new Tree(bot, currentBlockPosition);
+                return new Tree(bot, io, currentBlockPosition);
             }
             
             // Forgot this one haha
@@ -108,6 +115,87 @@ export default class Tree {
         }
         
         return treeLogs;
+    }
+    
+    /**
+     * Break tree
+     */
+    async breakTree() {
+        // The class has bot inside, and it's too big to print
+        if(this.debug) {
+            console.log(`Tree: `, this.position);
+        }
+        
+        const treePos = this.position;
+        // Walk towards the player
+        const defaultMove = new Movements(this.bot);
+        await this.bot.pathfinder.setMovements(defaultMove);
+        this.bot.pathfinder.setGoal(new GoalNear(treePos.x, treePos.y, treePos.z, 1));
+        
+        // When the player reaches the tree
+        // Execute chop tree
+        
+        // The player doesn't starts moving immedeately we have to wait a little
+        // If I could get more information about pathfinder this wouldn't be necessary
+        setTimeout(() => {
+            this.onGoalReached(() => this.chopTree(this));
+        }, 1000);
+    }
+    
+    /**
+     * Await to reach goal, checks each second
+     * 
+     * @param {*} mainFunction 
+     * @param {*} delay 
+     */
+    onGoalReached(mainFunction, delay = 500) {
+        // If there is no timer currently running
+        const moving = this.bot.pathfinder.isMoving();
+        if(!moving) {
+            // Execute the main function
+            return mainFunction();
+        } else {
+            // Set a timer to clear the timerFlag after the specified delay
+            this.moveTimerFlag = setTimeout(() => {
+                // Run this function again until the goal is reached.
+                this.moveTimerFlag = this.onGoalReached(mainFunction, delay);
+            }, delay);
+        }
+    }
+    
+    /**
+     * Chop tree
+     */
+    async chopTree(obj) {
+        // Chop tree down
+        try {
+            const logs = obj.treeLogs();
+            
+            if(obj.debug) {
+                console.log(`--- Chopping tree ---`);
+                console.log(`Logs: `, arrBlockView(logs));
+            }
+            
+            for(const log of logs) {
+                if(obj.debug) {
+                    console.log(`Current log: `, blockView(log));
+                }
+                
+                if (obj.bot.canDigBlock(log)) {
+                    try {
+                        await obj.bot.dig(log);
+                    } catch (err) {
+                        console.log(err.stack);
+                    }
+                } else {
+                    obj.io.error('Cannot dig');
+                }
+            };
+            
+            obj.io.ok("Tree down");
+        } catch(err) {
+            console.error(err);
+        }
     }
 }
 

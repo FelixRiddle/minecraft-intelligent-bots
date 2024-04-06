@@ -13,3 +13,9 @@ Auto-eat doesn't eats when player hp is low, I have to fix this.
 ## Collection
 
 - [ ] Collect and plant tree
+
+## Bot owned chests
+
+When the bot places a chest make it place a sign that it's his
+
+- [ ] Place sign in front of chest
