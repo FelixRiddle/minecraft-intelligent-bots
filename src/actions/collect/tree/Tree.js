@@ -13,6 +13,7 @@ const { GoalNear } = Pathfinder.goals;
 export default class Tree {
     debug = false;
     moveTimerFlag = null;
+    treeLogBlockName;
     
     /**
      * Tree constructor
@@ -25,13 +26,17 @@ export default class Tree {
         this.bot = bot;
         this.io = io;
         this.position = bottomLogPosition;
+        
+        this.treeLogBlockName = this.treeBlockName();
     }
     
     /**
      * Detect whole tree from a single block, throws error if it's not a tree
      */
     static fromSingleBlock(bot, io, blockPosition) {
-        console.log(`--- Tree position ---`);
+        if(this.debug) {
+            console.log(`--- Tree position ---`);
+        }
         
         if(!Tree.hasTopLeave(bot, blockPosition)) {
             throw Error("Not a tree, because it doesn't have a top leave.");
@@ -51,6 +56,7 @@ export default class Tree {
                     console.log(`First wood loc: `, currentBlockPosition);
                     console.log(`Dirt position: `, newBlock.position);
                 }
+                
                 return new Tree(bot, io, currentBlockPosition);
             }
             
@@ -75,6 +81,15 @@ export default class Tree {
         }
         
         return false;
+    }
+    
+    /**
+     * This object console view
+     * 
+     * @returns 
+     */
+    consoleView() {
+        return `${this.treeLogBlockName}${this.position}`;
     }
     
     /**
@@ -111,8 +126,7 @@ export default class Tree {
      * Get sapling name
      */
     saplingName() {
-        const blockName = this.treeBlockName();
-        const saplingName = saplingNameFromBlockName(blockName);
+        const saplingName = saplingNameFromBlockName(this.treeLogBlockName);
         return saplingName;
     }
     
@@ -122,7 +136,10 @@ export default class Tree {
     plantSapling() {
         try {
             const sapName = this.saplingName();
+            console.log(`Sapling name: '${sapName}'`);
+            
             equipJumpAndPlaceBlock(this.bot, this.io, sapName);
+            
             console.log(`Sapling planted`);
             this.io.ok("Sapling planted");
         } catch(err) {
@@ -222,6 +239,7 @@ export default class Tree {
                 
                 // Equip best item for breaking the block first
                 // Which is an axe
+                // The axe may break, so check every time
                 const axe = obj.bot.pathfinder.bestHarvestTool(log);
                 equipItemByName(obj.bot, obj.io, axe.name);
                 

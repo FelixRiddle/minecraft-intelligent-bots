@@ -1,3 +1,4 @@
+import vec3 from "vec3";
 
 /**
  * Equip and jump place on the spot
@@ -44,7 +45,6 @@ export function jumpAndPlaceBlock(bot, io) {
                 bot.removeListener('move', placeIfHighEnough);
                 
                 if(once) {
-                    io.setOk().msg('Placing a block was successful');
                     once = false;
                 }
             } catch (err) {

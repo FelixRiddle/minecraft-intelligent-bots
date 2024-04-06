@@ -1,3 +1,4 @@
+import { getLogBlocks } from '../../../registry/block/logBlock.js';
 import Tree from './Tree.js';
 import { treeBlockNames } from './index.js';
 
@@ -23,12 +24,12 @@ export default class CollectTree {
      */
     collectAndPlantTree() {
         const trees = this.findTrees();
-        
-        // It seems like trees actually returns only one for now
         const tree = trees[0];
         
         if(!tree) {
-            this.io.error("Couldn't find a tree nearby!");
+            const msg = "Couldn't find a tree nearby!";
+            console.error(msg);
+            this.io.error(msg);
         } else {
             // Break tree
             tree.breakTree();
@@ -37,36 +38,35 @@ export default class CollectTree {
     
     /**
      * Find tree
+     * 
+     * This is like a tree radar, I think it should be split into its own class.
      */
     findTrees() {
         // Get the correct block type
-        let treeBlocks = [];
-        for(const el of treeBlockNames) {
-            const blockType = this.bot.registry.blocksByName[el];
-            treeBlocks.push(blockType);
-            if (!blockType) {
-                this.io.error(`Couldn't find a block, this shouldn't be possible: ${el}.`);
-                return;
-            }
-        }
+        const treeBlocks = getLogBlocks(this.bot, this.io);
         const treeBlocksId = treeBlocks.map((block) => block.id);
+        // console.log(`Tree block ids: `, treeBlocksId);
         
-        // This only returns one block??
+        // Find blocks nearby
         const treeLogPositions = this.bot.findBlocks({
             // Only birch tree
-            matching: treeBlocksId
+            matching: treeBlocksId,
+            // Defaults to 16
+            maxDistance: 32,
+            // How many to find before returning
+            // Defaults to 1
+            count: 16,
         });
-        console.log(treeLogPositions);
+        // console.log(`Tree logs position: `, treeLogPositions);
         
+        // List trees only
+        // And remove duplicates
         let treesFoundNearby = [];
         for(const blockPosition of treeLogPositions) {
+            // The problem with this big try catch, is that it may hide important errors
             try {
                 // Get tree
                 const tree = this.tree(blockPosition);
-                
-                if(this.debug) {
-                    console.log(`Tree: `, tree);
-                }
                 
                 if(tree) {
                     // Detect duplicates
@@ -86,10 +86,25 @@ export default class CollectTree {
                 }
             } catch(err) {
                 // Not a tree
+                // console.error(`Error: `, err);
             }
         }
         
+        // this.printTreeList(treesFoundNearby);
+        
         return treesFoundNearby;
+    }
+    
+    /**
+     * Print tree list
+     */
+    printTreeList(trees) {
+        // Print all
+        console.log(`[`);
+        trees.map((tree) => {
+            console.log(`${tree.consoleView()}\n`);
+        });
+        console.log(`]`);
     }
     
     /**
