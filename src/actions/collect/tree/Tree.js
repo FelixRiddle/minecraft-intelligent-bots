@@ -107,6 +107,10 @@ export default class Tree {
         const treePos = this.position;
         // Walk towards the player
         const defaultMove = new Movements(this.bot);
+        
+        // I'm gonna have to make a default configuration for this
+        defaultMove.allow1by1towers = false;
+        
         await this.bot.pathfinder.setMovements(defaultMove);
         this.bot.pathfinder.setGoal(new GoalNear(treePos.x, treePos.y, treePos.z, 1));
         
@@ -161,9 +165,11 @@ export default class Tree {
             const faceDirection = vec3(0, 1, 0);
             await bot.placeBlock(blockBelow, faceDirection);
         } catch(err) {
-            const msg = `[Tree object]: Couldn't plant the sapling due to: ${err}`;
-            console.error(msg);
-            this.io.error(msg);
+            if(this.debug) {
+                const msg = `[Tree object]: Couldn't plant the sapling due to: ${err}`;
+                console.error(msg);
+                this.io.error(msg);
+            }
         }
     }
     

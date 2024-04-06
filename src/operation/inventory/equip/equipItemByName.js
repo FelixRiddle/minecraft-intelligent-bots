@@ -13,7 +13,8 @@ export default async function equipItemByName (bot, io, itemName) {
     try {
         await bot.equip(bot.registry[itemsByName][itemName].id, 'hand');
     } catch (err) {
-        io.setError().msg(`Unable to equip '${itemName}': ${err.message}`);
+        // No need to hear it
+        // io.setError().msg(`Unable to equip '${itemName}': ${err.message}`);
     }
 }
 

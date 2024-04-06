@@ -15,7 +15,6 @@ const treeBlockNames = [
  * Get the sapling name of a given block name
  */
 export function saplingNameFromBlockName(blockName) {
-    console.log(`Block name: ${blockName}`);
     switch(blockName) {
         case "oak_log": {
             return "oak_sapling";
