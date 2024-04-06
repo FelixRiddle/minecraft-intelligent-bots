@@ -1,6 +1,8 @@
 import Pathfinder, { Movements } from 'mineflayer-pathfinder';
 
 import Tree from './Tree.js';
+import { treeBlockNames } from './index.js';
+import { arrBlockView } from '../../../view/block.js';
 
 const { GoalNear } = Pathfinder.goals;
 
@@ -23,12 +25,34 @@ export default class CollectTree {
         
         // It seems like trees actually returns only one for now
         const tree = trees[0];
-        console.log(tree);
         
-        // Walk towards the player
-        const defaultMove = new Movements(this.bot);
-        this.bot.pathfinder.setMovements(defaultMove);
-        this.bot.pathfinder.setGoal(new GoalNear(tree.x, tree.y, tree.z, 0));
+        if(!tree) {
+            this.io.error("Couldn't find a tree nearby!");
+        } else {
+            // The class has bot inside, and it's too big to print
+            if(this.debug) {
+                console.log(`Tree: `, tree.position);
+            }
+            
+            const treePos = tree.position;
+            // Walk towards the player
+            const defaultMove = new Movements(this.bot);
+            this.bot.pathfinder.setMovements(defaultMove);
+            this.bot.pathfinder.setGoal(new GoalNear(treePos.x, treePos.y, treePos.z, 0));
+            
+            // Chop tree down
+            try {
+                if(this.debug) {
+                    console.log(`--- Finding tree logs ---`);
+                }
+                const logs = tree.treeLogs(2);
+                
+                console.log(`Logs: `, arrBlockView(logs));
+                
+            } catch(err) {
+                console.error(err);
+            }
+        }
     }
     
     /**
@@ -36,16 +60,6 @@ export default class CollectTree {
      */
     findTrees() {
         // Get the correct block type
-        const treeBlockNames = [
-            "oak_log",
-            "spruce_log",
-            "birch_log",
-            "jungle_log",
-            "acacia_log",
-            "dark_oak_log",
-            "mangrove_log",
-            "cherry_log",
-        ];
         let treeBlocks = [];
         for(const el of treeBlockNames) {
             const blockType = this.bot.registry.blocksByName[el];
@@ -60,32 +74,41 @@ export default class CollectTree {
         // This only returns one block??
         const treeLogPositions = this.bot.findBlocks({
             // Only birch tree
-            matching: treeBlocks[2].id
+            matching: treeBlocksId
         });
         console.log(treeLogPositions);
         
         let treesFoundNearby = [];
         for(const blockPosition of treeLogPositions) {
-            const treePos = this.treePosition(blockPosition);
-            
-            if(this.debug) {
-                console.log(`Tree pos: `, treePos);
-            }
-            
-            if(treePos) {
-                const res = treesFoundNearby.find((item) => !item.equals(item, treePos));
+            try {
+                // Get tree
+                const tree = this.tree(blockPosition);
                 
                 if(this.debug) {
-                    console.log(`Found tree: `, res);
+                    console.log(`Tree: `, tree);
                 }
                 
-                // If res is undefined
-                if(!res) {
-                    treesFoundNearby.push(treePos);
+                if(tree) {
+                    // Detect duplicates
+                    const duplicate = treesFoundNearby.find(
+                        (item) => item.position.equals(item.position, tree.position)
+                    );
+                    const isDuplicated = duplicate && true;
+                    
+                    if(this.debug) {
+                        console.log(`Found tree: `, res);
+                    }
+                    
+                    // Check if we already have it
+                    if(!isDuplicated) {
+                        treesFoundNearby.push(tree);
+                    }
                 }
+            } catch(err) {
+                // Not a tree
             }
         }
-        console.log(`Trees found nearby: `, treesFoundNearby);
+        // console.log(`Trees found nearby: `, treesFoundNearby);
         
         return treesFoundNearby;
     }

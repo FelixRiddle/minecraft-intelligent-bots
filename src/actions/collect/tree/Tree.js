@@ -1,3 +1,5 @@
+import blockView from "../../../view/block.js";
+import { treeLeaveNames } from "./index.js";
 
 /**
  * Tree class abstraction
@@ -73,21 +75,32 @@ export default class Tree {
      * Get tree logs
      * 
      * It starts from the bottom, uses the leaf at the top as a stop
+     * 
+     * I need relative height, because when I tell the bot to go to a place he automatically removes two logs
      */
-    treeLogs() {
+    treeLogs(fromRelativeHeight = 0) {
         // Check top leave
         let treeLogs = [];
         let foundLeaves = false;
-        for(let i = 0; i <= 8; i++) {
-            const newBlock = this.bot.blockAt(this.position.offset(0, i, 0));
+        for(let i = fromRelativeHeight; i <= 9 - fromRelativeHeight; i++) {
+            if(this.debug) {
+                console.log(`\n--- Iteration ${i} ---`);
+            }
             
-            // Gonna narrow it to birch for now
-            if(newBlock.name === "birch_leaves") {
+            const block = this.bot.blockAt(this.position.offset(0, i, 0));
+            
+            if(this.debug) {
+                console.log(`Current log: `, blockView(block));
+            }
+            
+            // Find the last leave
+            const isLeave = (treeLeaveNames.indexOf(block.name) > -1) && true;
+            if(isLeave) {
                 foundLeaves = true;
                 break;
             }
             
-            treeLogs.push(newBlock);
+            treeLogs.push(block);
         }
         
         if(!foundLeaves) {
