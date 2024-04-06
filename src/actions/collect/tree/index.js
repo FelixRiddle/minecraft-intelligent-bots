@@ -11,6 +11,30 @@ const treeBlockNames = [
     "cherry_log",
 ];
 
+/**
+ * Get the sapling name of a given block name
+ */
+export function saplingNameFromBlockName(blockName) {
+    switch(blockName) {
+        case "oak_log": {
+            return "oak_sapling";
+        }
+        case "spruce_log": {
+            return "spruce_sapling";
+        }
+        case "birch_log": {
+            return "birch_sapling";
+        }
+        case "jungle_log": {
+            return "jungle_sapling";
+        }
+        default: {
+            // Don't want to bother with the rest, not gonna use them for now
+            throw Error("saplingNameFromBlockName: Tree block not found, or not implemented!");
+        }
+    }
+}
+
 const treeLeaveNames = [
     'oak_leaves',
     'spruce_leaves',

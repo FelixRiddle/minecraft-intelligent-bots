@@ -1,13 +1,14 @@
-import Pathfinder, { Movements } from 'mineflayer-pathfinder';
-
 import Tree from './Tree.js';
 import { treeBlockNames } from './index.js';
-import { arrBlockView } from '../../../view/block.js';
-
-const { GoalNear } = Pathfinder.goals;
 
 /**
+ * Non-destructive way to collect trees
  * 
+ * Actions:
+ * 1) Bot looks and finds a tree
+ * 2) Go to tree
+ * 3) Chop tree
+ * 4) Plant sapling on the same spot(This is the non-destructive part)
  */
 export default class CollectTree {
     constructor(bot, io) {

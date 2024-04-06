@@ -1,7 +1,8 @@
 import Pathfinder, { Movements } from 'mineflayer-pathfinder';
 
 import blockView, { arrBlockView } from "../../../view/block.js";
-import { treeLeaveNames } from "./index.js";
+import { saplingNameFromBlockName, treeLeaveNames } from "./index.js";
+import equipJumpAndPlaceBlock from '../../../operation/actions/equipJumpAndPlace.js';
 
 const { GoalNear } = Pathfinder.goals;
 
@@ -41,9 +42,6 @@ export default class Tree {
             
             // Get a block below
             const newBlock = bot.blockAt(blockPosition.offset(0, -i, 0));
-            if(this.debug) {
-                console.log(`Current block: ${newBlock.position}(${newBlock.name})`);
-            }
             
             // Check if it's dirt
             if(newBlock.name === "dirt") {
@@ -76,6 +74,67 @@ export default class Tree {
         }
         
         return false;
+    }
+    
+    /**
+     * Break tree
+     */
+    async breakTree() {
+        // The class has bot inside, and it's too big to print
+        if(this.debug) {
+            console.log(`Tree: `, this.position);
+        }
+        
+        const treePos = this.position;
+        // Walk towards the player
+        const defaultMove = new Movements(this.bot);
+        await this.bot.pathfinder.setMovements(defaultMove);
+        this.bot.pathfinder.setGoal(new GoalNear(treePos.x, treePos.y, treePos.z, 1));
+        
+        // When the player reaches the tree
+        // Execute chop tree
+        
+        // The player doesn't starts moving immedeately we have to wait a little
+        // If I could get more information about pathfinder this wouldn't be necessary
+        setTimeout(() => {
+            this.onGoalReached(async () => {
+                await this.chopTree(this);
+        
+                // Plant sapling
+                this.plantSapling();
+            });
+        }, 1000);
+    }
+    
+    /**
+     * Get sapling name
+     */
+    saplingName() {
+        const blockName = this.treeBlockName();
+        const saplingName = saplingNameFromBlockName(blockName);
+        return saplingName;
+    }
+    
+    /**
+     * Try to plant sapling of the same tree
+     */
+    plantSapling() {
+        try {
+            const sapName = this.saplingName();
+            equipJumpAndPlaceBlock(this.bot, this.io, sapName);
+            console.log(`Sapling planted`);
+        } catch(err) {
+            console.error(`[Tree object]: Couldn't plant the sapling due to: `, err);
+        }
+    }
+    
+    /**
+     * Get the block name of the tree
+     * 
+     * Block name as in log block name
+     */
+    treeBlockName() {
+        return this.bot.blockAt(this.position).name;
     }
     
     /**
@@ -115,31 +174,6 @@ export default class Tree {
         }
         
         return treeLogs;
-    }
-    
-    /**
-     * Break tree
-     */
-    async breakTree() {
-        // The class has bot inside, and it's too big to print
-        if(this.debug) {
-            console.log(`Tree: `, this.position);
-        }
-        
-        const treePos = this.position;
-        // Walk towards the player
-        const defaultMove = new Movements(this.bot);
-        await this.bot.pathfinder.setMovements(defaultMove);
-        this.bot.pathfinder.setGoal(new GoalNear(treePos.x, treePos.y, treePos.z, 1));
-        
-        // When the player reaches the tree
-        // Execute chop tree
-        
-        // The player doesn't starts moving immedeately we have to wait a little
-        // If I could get more information about pathfinder this wouldn't be necessary
-        setTimeout(() => {
-            this.onGoalReached(() => this.chopTree(this));
-        }, 1000);
     }
     
     /**
