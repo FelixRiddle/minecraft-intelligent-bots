@@ -1,3 +1,7 @@
+import Pathfinder, { Movements } from 'mineflayer-pathfinder';
+
+const { GoalNear } = Pathfinder.goals;
+
 /**
  * 
  */
@@ -14,6 +18,14 @@ export default class CollectTree {
      */
     collectAndPlantTree() {
         const trees = this.findTrees();
+        
+        // It seems like trees actually returns only one for now
+        const tree = trees[0];
+        
+        // Walk towards the player
+        const defaultMove = new Movements(this.bot);
+        this.bot.pathfinder.setMovements(defaultMove);
+        this.bot.pathfinder.setGoal(new GoalNear(tree.x, tree.y, tree.z, 0));
     }
     
     /**
@@ -42,8 +54,10 @@ export default class CollectTree {
         }
         const treeBlocksId = treeBlocks.map((block) => block.id);
         
+        // This only returns one block??
         const treeLogPositions = this.bot.findBlocks({
-            matching: treeBlocksId
+            // Only birch tree
+            matching: treeBlocks[2].id
         });
         console.log(treeLogPositions);
         
@@ -103,6 +117,8 @@ export default class CollectTree {
      * Trows error if it's not a tree
      */
     treePosition(blockPosition) {
+        console.log(`--- Tree position ---`);
+        
         if(!this.hasTopLeave(blockPosition)) {
             throw Error("Not a tree, because it doesn't have a top leave.");
         }
@@ -113,11 +129,18 @@ export default class CollectTree {
             
             // Get a block below
             const newBlock = this.bot.blockAt(blockPosition.offset(0, -i, 0));
+            console.log(`Current block: ${newBlock.position}(${newBlock.name})`);
             
             // Check if it's dirt
             if(newBlock.name === "dirt") {
+                console.log(`\nResult:`);
+                console.log(`First wood loc: `, currentBlockPosition);
+                console.log(`Dirt position: `, newBlock.position);
                 return currentBlockPosition;
             }
+            
+            // Forgot this one haha
+            currentBlockPosition = newBlock.position;
         }
         
         throw Error("Not a tree, because it doesn't have dirt below it.")
