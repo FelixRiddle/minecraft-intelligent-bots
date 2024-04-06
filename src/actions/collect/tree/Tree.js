@@ -1,8 +1,8 @@
+import vec3 from "vec3";
 import Pathfinder, { Movements } from 'mineflayer-pathfinder';
 
 import blockView, { arrBlockView } from "../../../view/block.js";
 import { saplingNameFromBlockName, treeLeaveNames } from "./index.js";
-import equipJumpAndPlaceBlock from '../../../operation/actions/equipJumpAndPlace.js';
 import equipItemByName from '../../../operation/inventory/equip/equipItemByName.js';
 
 const { GoalNear } = Pathfinder.goals;
@@ -14,6 +14,9 @@ export default class Tree {
     debug = false;
     moveTimerFlag = null;
     treeLogBlockName;
+    
+    // First tree log position
+    position = vec3(0, 0, 0);
     
     /**
      * Tree constructor
@@ -131,17 +134,32 @@ export default class Tree {
     }
     
     /**
+     * Equip sapling of this type of tree
+     */
+    equipSapling() {
+        // Equip sapling
+        const sapName = this.saplingName();
+        equipItemByName(this.bot, this.io, sapName);
+    }
+    
+    /**
+     * Get the dirt block right below the tree
+     */
+    dirtBlock() {
+        return this.bot.blockAt(this.position.offset(0, -1, 0));
+    }
+    
+    /**
      * Try to plant sapling of the same tree
      */
-    plantSapling() {
+    async plantSapling() {
+        const bot = this.bot;
         try {
-            const sapName = this.saplingName();
-            console.log(`Sapling name: '${sapName}'`);
+            this.equipSapling();
             
-            equipJumpAndPlaceBlock(this.bot, this.io, sapName);
-            
-            console.log(`Sapling planted`);
-            this.io.ok("Sapling planted");
+            const blockBelow = this.dirtBlock();
+            const faceDirection = vec3(0, 1, 0);
+            await bot.placeBlock(blockBelow, faceDirection);
         } catch(err) {
             const msg = `[Tree object]: Couldn't plant the sapling due to: ${err}`;
             console.error(msg);
