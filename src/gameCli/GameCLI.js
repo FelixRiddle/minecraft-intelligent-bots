@@ -1,6 +1,7 @@
 import MessagePlayer from "../MessagePlayer.js";
 
 import Minion from '../Minion.js';
+import CollectTree from "../actions/collect/CollectTree.js";
 import ActionCmd from "./action/ActionCmd.js";
 import InventoryCmd from "./inventory/InventoryCmd.js";
 
@@ -48,6 +49,11 @@ export default class GameCLI {
                 const cmd = args[0];
                 if(cmd === "action") {
                     const action = new ActionCmd(bot, msgPlayer, nextArgs);
+                } else if(cmd === "collect") {
+                    const arg = args[1];
+                    if(arg === "tree") {
+                        const collectTree = new CollectTree(bot, msgPlayer);
+                    }
                 } else if(cmd === "come") {
                     msgPlayer.setOk().msg("Going towards the player");
                     

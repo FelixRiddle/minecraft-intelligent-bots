@@ -9,6 +9,27 @@ export default class MessagePlayer {
     }
     
     /**
+     * Message an error
+     * 
+     * @param {*} msg 
+     * @returns 
+     */
+    error(msg) {
+        this.setError();
+        this.bot.whisper(this.username, `${this.status} ${msg}`);
+        return this;
+    }
+    
+    /**
+     * Message an ok
+     */
+    ok(msg) {
+        this.setOk();
+        this.bot.whisper(this.username, `${this.status} ${msg}`);
+        return this;
+    }
+    
+    /**
      * 
      */
     setError() {

@@ -80,23 +80,22 @@ export default class Minion {
             // mineflayerViewer(bot, { port: 8001, firstPerson: true });
         });
         
-        bot.on('health', () => {
-            // Autoeat
+        bot.on('health', async () => {
             if(bot.food === 20) {
-                if(this.debug) {
-                    console.log(`Player full food`);
-                }
                 bot.autoEat.disable();
+                bot.autoEat.options.startAt = 16;
             } else {
-                if(this.debug) {
-                    console.log(`Player missing some points of food`);
-                }
-                try {
-                    bot.autoEat.enable();
-                } catch(err) {
-                    if(this.debug) {
-                        console.error(err);
-                    }
+                bot.autoEat.enable();
+            }
+            
+            // If down by three hearths
+            if(bot.health <= 20 - 6) {
+                // And food is less than 18
+                if(bot.food < 18) {
+                    console.log(`Has to eat, to recover life`);
+                    // autoeat.eat doesn't work when I call it dunno why
+                    // but with auto and changing this does work, so it's fine for me
+                    bot.autoEat.options.startAt = 17;
                 }
             }
         });
