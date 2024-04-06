@@ -1,3 +1,5 @@
+import equipItemByName from "../../operation/inventory/equip/equipItemByName.js";
+
 /**
  * Inventory management
  */
@@ -19,10 +21,16 @@ export default class InventoryCmd {
         if(arg === "equip") {
             if(args.length > 1) {
                 const nextArg = args[1];
-                if(nextArg === "dirt") {
-                    // Equip a dirt block if the player has
-                    this.equipDirt();
+                // if(nextArg === "dirt") {
+                //     // Equip a dirt block if the player has
+                //     this.equipDirt();
+                // }
+                if(!nextArg) {
+                    return this.io.error("No item specified");
                 }
+                
+                this.io.ok(`Equipping '${nextArg}'`);
+                equipItemByName(this.bot, this.io, nextArg);
             } else {
                 
             }
@@ -37,25 +45,6 @@ export default class InventoryCmd {
             }
         } else if(arg === "sort") {
             
-        }
-    }
-    
-    /**
-     * Equip an item
-     */
-    async equipDirt () {
-        let itemsByName = undefined;
-        if (this.bot.supportFeature('itemsAreNotBlocks')) {
-            itemsByName = 'itemsByName';
-        } else if (this.bot.supportFeature('itemsAreAlsoBlocks')) {
-            itemsByName = 'blocksByName';
-        }
-        
-        try {
-            await this.bot.equip(this.bot.registry[itemsByName].dirt.id, 'hand');
-            this.io.setOk().msg('equipped dirt');
-        } catch (err) {
-            this.io.setError().msg(`unable to equip dirt: ${err.message}`);
         }
     }
 }

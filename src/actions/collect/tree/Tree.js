@@ -123,8 +123,11 @@ export default class Tree {
             const sapName = this.saplingName();
             equipJumpAndPlaceBlock(this.bot, this.io, sapName);
             console.log(`Sapling planted`);
+            this.io.ok("Sapling planted");
         } catch(err) {
-            console.error(`[Tree object]: Couldn't plant the sapling due to: `, err);
+            const msg = `[Tree object]: Couldn't plant the sapling due to: ${err}`;
+            console.error(msg);
+            this.io.error(msg);
         }
     }
     
