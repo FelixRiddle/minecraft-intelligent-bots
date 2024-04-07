@@ -46,6 +46,7 @@ From the docs
 
 [Mineflayer](https://prismarinejs.github.io/mineflayer/#/)
 [TheDude FromCI](https://www.youtube.com/watch?v=Giu0ADA5uo8)
+[Mineflayer state machine](https://prismarinejs.github.io/mineflayer-statemachine/docs/api#1-state-machine)
 
 # Personal note
 

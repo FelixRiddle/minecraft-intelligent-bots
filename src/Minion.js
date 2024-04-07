@@ -4,16 +4,18 @@
 import inventoryViewer from 'mineflayer-web-inventory';
 import armorManager from "mineflayer-armor-manager";
 import mineflayer from "mineflayer";
-// import { mineflayer as mineflayerViewer } from "prismarine-viewer";
+import { mineflayer as mineflayerViewer } from "prismarine-viewer";
 import Pathfinder, { pathfinder, Movements } from 'mineflayer-pathfinder';
 import { plugin as AutoEat } from "mineflayer-auto-eat";
 import { plugin as pvp } from "mineflayer-pvp";
-
-const { GoalNear } = Pathfinder.goals;
+import { BehaviorPrintServerStats, BotStateMachine, NestedStateMachine, StateTransition } from 'mineflayer-statemachine';
 
 import { bit_toggle, bit_test } from "./bit.js";
 import GameCLI from "./gameCli/GameCLI.js";
 import goTowardsEntity from './operation/movement/goTowardsEntity.js';
+import BehaviorIdle from './behavior/BehaviorIdle.js';
+
+const { GoalNear } = Pathfinder.goals;
 
 const ITEM_GATHER_DISTANCE = 10;
 const DISTANCE_TO_ATTACK = 6;
@@ -74,34 +76,27 @@ export default class Minion {
             // password: '12345678'      // set if you want to use password-based auth (may be unreliable). If specified, the `username` must be an email
         });
         
+        // --- Web viewers ---
         // Web inventory viewer
         inventoryViewer(bot, {
             port: 8002
         });
-        
-        /**
-         * This reads every chat message
-         */
-        bot.on('chat', (username, message) => {
-            // The bot is speaking to... himself???
-            if(username === bot.username) {
-                return;
-            }
             
-            // Resend the same message
-            bot.chat(message);
+        // Port is the minecraft server port
+        mineflayerViewer(bot, {
+            port: 8001
         });
         
-        // Log errors and kick reasons:
-        bot.on('kicked', console.log);
-        bot.on('error', console.log);
-        
-        // Plugins
+        // --- Load Plugins ---
         bot.loadPlugin(pathfinder);
         bot.loadPlugin(AutoEat);
         bot.loadPlugin(armorManager);
         bot.loadPlugin(pvp);
         
+        // --- Bot events ---
+        // Log errors and kick reasons:
+        bot.on('kicked', console.log);
+        bot.on('error', console.log);
         // View player on the browser
         bot.once('spawn', () => {
             // Autoeat options
@@ -110,9 +105,41 @@ export default class Minion {
                 startAt: 14,
                 bannedFood: [],
             };
+        
+            // --- State machine ---
+            const idleState = new BehaviorIdle(this.bot);
+            const printServerStats = new BehaviorPrintServerStats(this.bot);
+            const onStartTransitions = [
+                new StateTransition({
+                    parent: idleState, // The state to move from
+                    child: printServerStats, // The state to move to
+                    name: 'idleToPrintStats', // Optional. Used for debugging
+                    shouldTransition: () => true, // Optional, called each tick to determine if this transition should occur.
+                    onTransition: () => console.log("Printing server stats:"), // Optional, called when this transition is run.
+                })
+            ];
+        
+            // Find food and eat transitions example
+            // const eatTransitions = [
+            //     new StateTransition({ // Called if the bot has a food
+            //         parent: tryToEat,
+            //         child: eatFood,
+            //         shouldTransition: () => bot.hasFood(),
+            //     }),
+            //     new StateTransition({ // Called if the bot doesn't have food
+            //         parent: tryToEat,
+            //         child: findFood,
+            //         shouldTransition: () => true,
+            //     }),
+            // ];
             
-            // Port is the minecraft server port
-            // mineflayerViewer(bot, { port: 8001, firstPerson: true });
+            // --- Initialize state machine ---
+            // Now we just wrap our transition list in a nested state machine layer. We want the bot
+            // to start on the getClosestPlayer state, so we'll specify that here.
+            const rootLayer = new NestedStateMachine(onStartTransitions, idleState);
+            
+            // We can start our state machine simply by creating a new instance.
+            new BotStateMachine(bot, rootLayer);
         });
         
         bot.on('health', async () => {
@@ -177,9 +204,11 @@ export default class Minion {
                 if(entity.name === "phantom") {
                     const distance = bot.entity.position.distanceTo(entity.position);
                     if(distance < DISTANCE_TO_ATTACK) {
-                        console.log(`\n--- Hostile entity ${entity.displayName} ---`);
-                        console.log(`Entity name: ${entity.name}`);
-                        console.log(`Entity type: `, entity.kind);
+                        if(this.debug) {
+                            console.log(`\n--- Hostile entity ${entity.displayName} ---`);
+                            console.log(`Entity name: ${entity.name}`);
+                            console.log(`Entity type: `, entity.kind);
+                        }
                         
                         attackEntity(bot, entity);
                     }
@@ -199,8 +228,10 @@ export default class Minion {
                     }
                 }
             } else if(entity.type === "object") {
-                console.log(`--- Object ${entity.displayName} ---`);
-                console.log(`Entity name: ${entity.name}`);
+                if(this.debug) {
+                    console.log(`--- Object ${entity.displayName} ---`);
+                    console.log(`Entity name: ${entity.name}`);
+                }
             }
             
             // TODO: Abstract this down to a class
@@ -219,6 +250,10 @@ export default class Minion {
                         
                         const obj = this;
                         
+                        // Face the entity
+                        bot.lookAt(entity.position);
+                        
+                        // Go
                         goTowardsEntity(bot, entity)
                             .then(() => {
                                 if(this.debug) {
@@ -226,7 +261,7 @@ export default class Minion {
                                 }
                                 obj.gatheringItem = false;
                             }).catch(err => {
-                                
+                                console.log(`Couldn't gather item!`);
                             });
                         this.gatheringItem = true;
                     }
