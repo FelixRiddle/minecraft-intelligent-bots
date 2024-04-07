@@ -4,6 +4,7 @@
 - [x] Go to tree
 - [x] Collect tree
 - [x] Plant sapling
+- [x] Use correct tool for breaking a tree
 
 # Bugs
 

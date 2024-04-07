@@ -13,7 +13,9 @@ const { GoalNear } = Pathfinder.goals;
 
 import { bit_toggle, bit_test } from "./bit.js";
 import GameCLI from "./gameCli/GameCLI.js";
+import goTowardsEntity from './operation/movement/goTowardsEntity.js';
 
+const ITEM_GATHER_DISTANCE = 10;
 const DISTANCE_TO_ATTACK = 6;
 
 /**
@@ -49,6 +51,9 @@ export default class Minion {
     commanderUsername = "";
     debug = false;
     actions = 0;
+    
+    // True when the bot is gathering an item
+    gatheringItem = false;
     
     /**
      * 
@@ -122,7 +127,9 @@ export default class Minion {
             if(Math.floor(bot.health) <= 20 - 6) {
                 // And food is less than 18
                 if(bot.food < 18) {
-                    console.log(`Has to eat, to recover life`);
+                    if(this.debug) {
+                        console.log(`Has to eat, to recover life`);
+                    }
                     // autoeat.eat doesn't work when I call it dunno why
                     // but with auto and changing this does work, so it's fine for me
                     bot.autoEat.options.startAt = 17;
@@ -138,9 +145,11 @@ export default class Minion {
                 const distance = bot.entity.position.distanceTo(entity.position);
                 if(distance < DISTANCE_TO_ATTACK) {
                     
-                    // console.log(`\n--- Near hostile entity ${entity.displayName} ---`);
-                    // console.log(`Entity name: ${entity.name}`);
-                    // console.log(`Entity type: `, entity.kind);
+                    if(this.debug) {
+                        console.log(`\n--- Near hostile entity ${entity.displayName} ---`);
+                        console.log(`Entity name: ${entity.name}`);
+                        console.log(`Entity type: `, entity.kind);
+                    }
                     
                     // console.log(`Distance to entity: `, distance);
                     
@@ -192,13 +201,51 @@ export default class Minion {
             } else if(entity.type === "object") {
                 console.log(`--- Object ${entity.displayName} ---`);
                 console.log(`Entity name: ${entity.name}`);
-                
+            }
+            
+            // TODO: Abstract this down to a class
+            // The entity type of items is 'UNKNOWN', I think this might change so not gonna use it
+            if(entity.name === "item") {
+                // Item spawned
+                // Go towards it
+                const distance = bot.entity.position.distanceTo(entity.position);
+                if(distance < ITEM_GATHER_DISTANCE) {
+                    // Check if there's no priority action first
+                    if(!this.doingPriorityAction() && !this.gatheringItem) {
+                        // Gather item
+                        if(this.debug) {
+                            console.log(`[Detected item nearby] Going to gather it`);
+                        }
+                        
+                        const obj = this;
+                        
+                        goTowardsEntity(bot, entity)
+                            .then(() => {
+                                if(this.debug) {
+                                    console.log(`[Item collected]`);
+                                }
+                                obj.gatheringItem = false;
+                            }).catch(err => {
+                                
+                            });
+                        this.gatheringItem = true;
+                    }
+                }
             }
         });
         
         const gameCli = new GameCLI(bot, this);
                 
         this.bot = bot;
+    }
+    
+    /**
+     * Doing an action with priority
+     */
+    doingPriorityAction() {
+        // Attacking
+        const attacking = this.bot.pvp.target && true;
+        return attacking;
     }
     
     // --- Follow player ---
