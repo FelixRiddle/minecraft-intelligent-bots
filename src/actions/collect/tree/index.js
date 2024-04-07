@@ -48,6 +48,26 @@ const treeLeaveNames = [
     'flowering_azalea_leaves'
 ];
 
+/**
+ * Check if a given block is tree leaves
+ */
+export function blockIsTreeLeaves(block) {
+    // console.log(`Testing against: `, block.name);
+    
+    for(const treeLeaveName of treeLeaveNames) {
+        const match = block.name === treeLeaveName;
+        
+        // console.log(`Tree leave name: `, treeLeaveName);
+        // console.log(`Match: `, match);
+        
+        if(match) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 export {
     treeBlockNames,
     treeLeaveNames,

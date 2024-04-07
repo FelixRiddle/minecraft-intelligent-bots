@@ -11,6 +11,8 @@ import Tree from './Tree.js';
  * 4) Plant sapling on the same spot(This is the non-destructive part)
  */
 export default class CollectTree {
+    debug = false;
+    
     constructor(bot, io) {
         this.bot = bot;
         this.io = io;
@@ -41,10 +43,16 @@ export default class CollectTree {
      * This is like a tree radar, I think it should be split into its own class.
      */
     findTrees() {
+        const stageName = "[Find trees]";
+        
         // Get the correct block type
         const treeBlocks = getLogBlocks(this.bot, this.io);
         const treeBlocksId = treeBlocks.map((block) => block.id);
-        // console.log(`Tree block ids: `, treeBlocksId);
+        if(this.debug) {
+            console.log(`\n${stageName}[Stage 1] Get tree block names and their ids`);
+            console.log(`Tree block names: `, treeBlocks);
+            console.log(`Tree block ids: `, treeBlocksId);
+        }
         
         // Find blocks nearby
         const treeLogPositions = this.bot.findBlocks({
@@ -56,7 +64,10 @@ export default class CollectTree {
             // Defaults to 1
             count: 16,
         });
-        // console.log(`Tree logs position: `, treeLogPositions);
+        if(this.debug) {
+            console.log(`\n${stageName}[Stage 2] Get log blocks nearby`);
+            console.log(`Tree logs position: `, treeLogPositions);
+        }
         
         // List trees only
         // And remove duplicates
@@ -75,7 +86,8 @@ export default class CollectTree {
                     const isDuplicated = duplicate && true;
                     
                     if(this.debug) {
-                        console.log(`Found tree: `, res);
+                        console.log(`Found tree: `, tree);
+                        console.log(`Is duplicated?: `, isDuplicated);
                     }
                     
                     // Check if we already have it
@@ -85,11 +97,14 @@ export default class CollectTree {
                 }
             } catch(err) {
                 // Not a tree
-                // console.error(`Error: `, err);
+                console.error(`Error: `, err);
             }
         }
         
-        // this.printTreeList(treesFoundNearby);
+        if(this.debug) {
+            console.log(`${stageName}[Stage 3] Validate trees and filter out duplicates`);
+            this.printTreeList(treesFoundNearby);
+        }
         
         return treesFoundNearby;
     }

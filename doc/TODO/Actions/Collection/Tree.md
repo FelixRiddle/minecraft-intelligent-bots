@@ -12,3 +12,10 @@
 - [x] Sometimes the bot breaks dirt below the tree for some reason?
 
 I don't know if this one was fixed but it doesn't happen anymore)?
+
+- [x] Collect tree stopped working
+
+Don't know why
+
+- [x] Can't collect other trees that are not birch tree
+

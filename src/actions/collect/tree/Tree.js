@@ -2,10 +2,16 @@ import vec3 from "vec3";
 import Pathfinder, { Movements } from 'mineflayer-pathfinder';
 
 import blockView, { arrBlockView } from "../../../view/block.js";
-import { saplingNameFromBlockName, treeLeaveNames } from "./index.js";
+import { blockIsTreeLeaves, saplingNameFromBlockName, treeLeaveNames } from "./index.js";
 import equipItemByName from '../../../operation/inventory/equip/equipItemByName.js';
 
 const { GoalNear } = Pathfinder.goals;
+
+// Max tree size
+// The bot is not able to gather tall trees
+// This is a filter
+// If the tree is taller than 7 blocks, the bot will not gather it
+const MAX_TREE_SIZE = 16;
 
 /**
  * Tree class abstraction
@@ -14,12 +20,6 @@ export default class Tree {
     debug = false;
     moveTimerFlag = null;
     treeLogBlockName;
-    
-    // Max tree size
-    // The bot is not able to gather tall trees
-    // This is a filter
-    // If the tree is taller than 7 blocks, the bot will not gather it
-    maxTreeSize = 16;
     
     // First tree log position
     position = vec3(0, 0, 0);
@@ -43,18 +43,29 @@ export default class Tree {
      * Detect whole tree from a single block, throws error if it's not a tree
      */
     static fromSingleBlock(bot, io, blockPosition) {
+        if(!bot || !io || !blockPosition) {
+            throw Error("An argument wasn't given");
+        }
+        
+        // Debugging
+        const stageName = `[Validate tree]`;
         if(this.debug) {
-            console.log(`--- Tree position ---`);
+            console.log(`\n${stageName}`);
         }
         
         if(!Tree.hasTopLeave(bot, blockPosition)) {
             throw Error("Not a tree, because it doesn't have a top leave.");
         }
         
+        if(this.debug) {
+            console.log(`\n${stageName}[Stage 1] The tree has top leave`);
+            console.log(`Ok the tree does have top leave`);
+        }
+        
         // The bottom is at least 6
         let currentBlockPosition = blockPosition;
         // for(let i = 0; i <= 6; i++) {
-        for(let i = 0; i <= this.maxTreeSize; i++) {
+        for(let i = 0; i <= MAX_TREE_SIZE; i++) {
             
             // Get a block below
             const newBlock = bot.blockAt(blockPosition.offset(0, -i, 0));
@@ -81,13 +92,30 @@ export default class Tree {
      * Check that the top leave exists
      */
     static hasTopLeave(bot, blockPosition) {
+        if(this.debug) {
+            console.log(`[hasTopLeave function]`);
+            
+            console.log(`Tree max size: `, MAX_TREE_SIZE);
+        }
+        
         // Check top leave
-        for(let i = 0; i <= this.maxTreeSize; i++) {
-            const newBlock = bot.blockAt(blockPosition.offset(0, i, 0));
-            // Gonna narrow it to birch for now
-            if(newBlock.name === "birch_leaves") {
+        for(let i = 0; i <= MAX_TREE_SIZE; i++) {
+            const block = bot.blockAt(blockPosition.offset(0, i, 0));
+            const isLeave = blockIsTreeLeaves(block);
+            
+            if(this.debug) {
+                console.log(`Block: `, block);
+                console.log(`Is leave?: `, isLeave);
+            }
+            
+            // Any tree leaves
+            if(isLeave) {
                 return true;
             }
+        }
+        
+        if(this.debug) {
+            console.log(`Not a tree`);
         }
         
         return false;
@@ -175,7 +203,7 @@ export default class Tree {
             if(this.debug) {
                 const msg = `[Tree object]: Couldn't plant the sapling due to: ${err}`;
                 console.error(msg);
-                this.io.error(msg);
+                // this.io.error(msg);
             }
         }
     }
@@ -201,9 +229,8 @@ export default class Tree {
         let treeLogs = [];
         let foundLeaves = false;
         
-        // for(let i = fromRelativeHeight; i <= 9 - fromRelativeHeight; i++) {
         // Tree size + 1 to check for the leaves
-        for(let i = fromRelativeHeight; i <= (this.maxTreeSize + 1) - fromRelativeHeight; i++) {
+        for(let i = fromRelativeHeight; i <= (MAX_TREE_SIZE + 1) - fromRelativeHeight; i++) {
             if(this.debug) {
                 console.log(`\n--- Iteration ${i} ---`);
             }
@@ -275,7 +302,11 @@ export default class Tree {
                 // Which is an axe
                 // The axe may break, so check every time
                 const axe = obj.bot.pathfinder.bestHarvestTool(log);
-                equipItemByName(obj.bot, obj.io, axe.name);
+                
+                // If there's no axe, hit with the hand
+                if(axe) {
+                    equipItemByName(obj.bot, obj.io, axe.name);
+                }
                 
                 // Check if the block can be broken
                 // You can't break bedrock in survival
@@ -286,7 +317,8 @@ export default class Tree {
                         console.log(err.stack);
                     }
                 } else {
-                    obj.io.error('Cannot dig');
+                    console.log('Cant break block');
+                    // obj.io.error('Cannot dig');
                 }
             };
             
