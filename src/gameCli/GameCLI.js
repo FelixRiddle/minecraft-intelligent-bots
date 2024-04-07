@@ -4,6 +4,7 @@ import Minion from '../Minion.js';
 import CollectTree from "../actions/collect/tree/CollectTree.js";
 import ActionCmd from "./action/ActionCmd.js";
 import InventoryCmd from "./inventory/InventoryCmd.js";
+import startStateMachine from "../state/index.js";
 
 /**
  * Game cli
@@ -70,6 +71,12 @@ export default class GameCLI {
                     const hunger = this.displayRemainingStat(remaining);
                     
                     msgPlayer.setOk().msg(`My Hunger is: [${hunger}](${remaining.toPrecision(2)})`);
+                } else if(cmd === "enable") {
+                    const arg = args[1];
+                    // Enable state machine
+                    if(arg === "state") {
+                        startStateMachine(this.bot);
+                    }
                 } else if(cmd === "follow") {
                     // Enable the first bit
                     this.minion.toggleFollowPlayer();

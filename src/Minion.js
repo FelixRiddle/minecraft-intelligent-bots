@@ -8,12 +8,11 @@ import { mineflayer as mineflayerViewer } from "prismarine-viewer";
 import Pathfinder, { pathfinder, Movements } from 'mineflayer-pathfinder';
 import { plugin as AutoEat } from "mineflayer-auto-eat";
 import { plugin as pvp } from "mineflayer-pvp";
-import { BehaviorPrintServerStats, BotStateMachine, NestedStateMachine, StateTransition } from 'mineflayer-statemachine';
 
 import { bit_toggle, bit_test } from "./bit.js";
 import GameCLI from "./gameCli/GameCLI.js";
 import goTowardsEntity from './operation/movement/goTowardsEntity.js';
-import BehaviorIdle from './behavior/BehaviorIdle.js';
+import startStateMachine from './state/index.js';
 
 const { GoalNear } = Pathfinder.goals;
 
@@ -97,7 +96,8 @@ export default class Minion {
         // Log errors and kick reasons:
         bot.on('kicked', console.log);
         bot.on('error', console.log);
-        // View player on the browser
+        
+        // Spawn
         bot.once('spawn', () => {
             // Autoeat options
             bot.autoEat.options = {
@@ -105,41 +105,8 @@ export default class Minion {
                 startAt: 14,
                 bannedFood: [],
             };
-        
-            // --- State machine ---
-            const idleState = new BehaviorIdle(this.bot);
-            const printServerStats = new BehaviorPrintServerStats(this.bot);
-            const onStartTransitions = [
-                new StateTransition({
-                    parent: idleState, // The state to move from
-                    child: printServerStats, // The state to move to
-                    name: 'idleToPrintStats', // Optional. Used for debugging
-                    shouldTransition: () => true, // Optional, called each tick to determine if this transition should occur.
-                    onTransition: () => console.log("Printing server stats:"), // Optional, called when this transition is run.
-                })
-            ];
-        
-            // Find food and eat transitions example
-            // const eatTransitions = [
-            //     new StateTransition({ // Called if the bot has a food
-            //         parent: tryToEat,
-            //         child: eatFood,
-            //         shouldTransition: () => bot.hasFood(),
-            //     }),
-            //     new StateTransition({ // Called if the bot doesn't have food
-            //         parent: tryToEat,
-            //         child: findFood,
-            //         shouldTransition: () => true,
-            //     }),
-            // ];
             
-            // --- Initialize state machine ---
-            // Now we just wrap our transition list in a nested state machine layer. We want the bot
-            // to start on the getClosestPlayer state, so we'll specify that here.
-            const rootLayer = new NestedStateMachine(onStartTransitions, idleState);
-            
-            // We can start our state machine simply by creating a new instance.
-            new BotStateMachine(bot, rootLayer);
+            startStateMachine(this.bot);
         });
         
         bot.on('health', async () => {

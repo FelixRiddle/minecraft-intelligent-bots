@@ -203,7 +203,7 @@ export default class Tree {
             if(this.debug) {
                 const msg = `[Tree object]: Couldn't plant the sapling due to: ${err}`;
                 console.error(msg);
-                // this.io.error(msg);
+                this.io.error(msg);
             }
         }
     }
@@ -324,7 +324,7 @@ export default class Tree {
             
             obj.io.ok("Tree down");
         } catch(err) {
-            console.error(err);
+            // console.error(err);
         }
     }
 }

@@ -42,11 +42,17 @@ From the docs
 'It's possible to display in a browser window what your bot is doing'
 [Mineflayer](https://prismarinejs.github.io/mineflayer/#/)
 
-# Reference/s
+# Reference/s or other resources
 
 [Mineflayer](https://prismarinejs.github.io/mineflayer/#/)
 [TheDude FromCI](https://www.youtube.com/watch?v=Giu0ADA5uo8)
 [Mineflayer state machine](https://prismarinejs.github.io/mineflayer-statemachine/docs/api#1-state-machine)
+
+## MineRL
+
+[Video](https://www.youtube.com/watch?v=z6PTrGifupU)
+[Website](https://minerl.io/)
+[Documentation](https://minerl.readthedocs.io/en/latest/tutorials/first_agent.html)
 
 # Personal note
 

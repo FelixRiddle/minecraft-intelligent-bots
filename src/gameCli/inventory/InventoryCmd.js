@@ -21,10 +21,6 @@ export default class InventoryCmd {
         if(arg === "equip") {
             if(args.length > 1) {
                 const nextArg = args[1];
-                // if(nextArg === "dirt") {
-                //     // Equip a dirt block if the player has
-                //     this.equipDirt();
-                // }
                 if(!nextArg) {
                     return this.io.error("No item specified");
                 }

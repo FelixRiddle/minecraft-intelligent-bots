@@ -97,7 +97,7 @@ export default class CollectTree {
                 }
             } catch(err) {
                 // Not a tree
-                console.error(`Error: `, err);
+                // console.error(`Error: `, err);
             }
         }
         
