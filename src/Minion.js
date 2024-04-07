@@ -1,6 +1,7 @@
 // Consider mineflayer a 'bridge'
 // My library hast to be singular compared to the many 'bridges'
 // This is a concept I often fail to realize
+import armorManager from "mineflayer-armor-manager";
 import mineflayer from "mineflayer";
 // import { mineflayer as mineflayerViewer } from "prismarine-viewer";
 import Pathfinder, { pathfinder, Movements } from 'mineflayer-pathfinder';
@@ -10,6 +11,15 @@ const { GoalNear } = Pathfinder.goals;
 
 import { bit_toggle, bit_test } from "./bit.js";
 import GameCLI from "./gameCli/GameCLI.js";
+
+/**
+ * Attack an entity
+ */
+function attackEntity(bot, entity) {
+    // Face the enemy
+    bot.lookAt(entity.position);
+    bot.attack(entity, true);
+}
 
 /**
  * Very high level api
@@ -66,6 +76,7 @@ export default class Minion {
         // Plugins
         bot.loadPlugin(pathfinder);
         bot.loadPlugin(AutoEat);
+        bot.loadPlugin(armorManager);
         
         // View player on the browser
         bot.once('spawn', () => {
@@ -102,18 +113,58 @@ export default class Minion {
         
         // When an entity moves
         bot.on('entityMoved', (entity) => {
-            // Check if it's the player
-            if(entity.type === "player" && entity.username === this.commanderUsername) {
-                const player = entity;
-                // Check if follow player is activated
-                if(this.followsPlayer()) {
-                    // Big mistake I made
-                    // this.throttleFollowPlayer(this.goToPlayer(player, 5));
-                    // Correct way
-                    // Because the function must be called internally
-                    const obj = this;
-                    this.throttleFollowPlayer(() => obj.goToPlayer(player, 5), 1000 * 3);
+            // WARNING: Phantoms are new mobs and mineflayer is not updated for them yet
+            // So to detect phantoms you must use the 'mob' type
+            if(entity.type === "hostile") {
+                const distance = bot.entity.position.distanceTo(entity.position);
+                if(distance < 5) {
+                    
+                    console.log(`\n--- Near hostile entity ${entity.displayName} ---`);
+                    console.log(`Entity name: ${entity.name}`);
+                    console.log(`Entity type: `, entity.kind);
+                    
+                    console.log(`Distance to entity: `, distance);
+                    
+                    attackEntity(bot, entity);
                 }
+            }
+            
+            // Check if it's the player
+            if(entity.type === "mob") {
+                if(this.debug) {
+                    console.log(`\n--- Entity ${entity.displayName} ---`);
+                    console.log(`Entity name: ${entity.name}`);
+                    console.log(`Entity type: `, entity.kind);
+                }
+                
+                // Hostile entity
+                if(entity.name === "phantom") {
+                    const distance = bot.entity.position.distanceTo(entity.position);
+                    if(distance < 5) {
+                        console.log(`\n--- Hostile entity ${entity.displayName} ---`);
+                        console.log(`Entity name: ${entity.name}`);
+                        console.log(`Entity type: `, entity.kind);
+                        
+                        attackEntity(bot, entity);
+                    }
+                }
+            } else if(entity.type === "player") {
+                // Check if it's a commander
+                if(entity.username === this.commanderUsername) {
+                    const player = entity;
+                    // Check if follow player is activated
+                    if(this.followsPlayer()) {
+                        // Big mistake I made
+                        // this.throttleFollowPlayer(this.goToPlayer(player, 5));
+                        // Correct way
+                        // Because the function must be called internally
+                        const obj = this;
+                        this.throttleFollowPlayer(() => obj.goToPlayer(player, 5), 1000 * 3);
+                    }
+                }
+            } else if(entity.type === "object") {
+                console.log(`--- Object ${entity.displayName} ---`);
+                console.log(`Entity name: ${entity.name}`);
             }
         });
         

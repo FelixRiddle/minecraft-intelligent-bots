@@ -15,6 +15,12 @@ export default class Tree {
     moveTimerFlag = null;
     treeLogBlockName;
     
+    // Max tree size
+    // The bot is not able to gather tall trees
+    // This is a filter
+    // If the tree is taller than 7 blocks, the bot will not gather it
+    maxTreeSize = 16;
+    
     // First tree log position
     position = vec3(0, 0, 0);
     
@@ -47,7 +53,8 @@ export default class Tree {
         
         // The bottom is at least 6
         let currentBlockPosition = blockPosition;
-        for(let i = 0; i <= 6; i++) {
+        // for(let i = 0; i <= 6; i++) {
+        for(let i = 0; i <= this.maxTreeSize; i++) {
             
             // Get a block below
             const newBlock = bot.blockAt(blockPosition.offset(0, -i, 0));
@@ -75,7 +82,7 @@ export default class Tree {
      */
     static hasTopLeave(bot, blockPosition) {
         // Check top leave
-        for(let i = 0; i <= 8; i++) {
+        for(let i = 0; i <= this.maxTreeSize; i++) {
             const newBlock = bot.blockAt(blockPosition.offset(0, i, 0));
             // Gonna narrow it to birch for now
             if(newBlock.name === "birch_leaves") {
@@ -193,7 +200,10 @@ export default class Tree {
         // Check top leave
         let treeLogs = [];
         let foundLeaves = false;
-        for(let i = fromRelativeHeight; i <= 9 - fromRelativeHeight; i++) {
+        
+        // for(let i = fromRelativeHeight; i <= 9 - fromRelativeHeight; i++) {
+        // Tree size + 1 to check for the leaves
+        for(let i = fromRelativeHeight; i <= (this.maxTreeSize + 1) - fromRelativeHeight; i++) {
             if(this.debug) {
                 console.log(`\n--- Iteration ${i} ---`);
             }

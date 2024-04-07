@@ -1,6 +1,5 @@
 import { getLogBlocks } from '../../../registry/block/logBlock.js';
 import Tree from './Tree.js';
-import { treeBlockNames } from './index.js';
 
 /**
  * Non-destructive way to collect trees
