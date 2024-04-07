@@ -45,6 +45,7 @@ From the docs
 # Reference/s
 
 [Mineflayer](https://prismarinejs.github.io/mineflayer/#/)
+[TheDude FromCI](https://www.youtube.com/watch?v=Giu0ADA5uo8)
 
 # Personal note
 

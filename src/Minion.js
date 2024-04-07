@@ -1,16 +1,20 @@
 // Consider mineflayer a 'bridge'
 // My library hast to be singular compared to the many 'bridges'
 // This is a concept I often fail to realize
+import inventoryViewer from 'mineflayer-web-inventory';
 import armorManager from "mineflayer-armor-manager";
 import mineflayer from "mineflayer";
 // import { mineflayer as mineflayerViewer } from "prismarine-viewer";
 import Pathfinder, { pathfinder, Movements } from 'mineflayer-pathfinder';
 import { plugin as AutoEat } from "mineflayer-auto-eat";
+import { plugin as pvp } from "mineflayer-pvp";
 
 const { GoalNear } = Pathfinder.goals;
 
 import { bit_toggle, bit_test } from "./bit.js";
 import GameCLI from "./gameCli/GameCLI.js";
+
+const DISTANCE_TO_ATTACK = 6;
 
 /**
  * Attack an entity
@@ -18,7 +22,16 @@ import GameCLI from "./gameCli/GameCLI.js";
 function attackEntity(bot, entity) {
     // Face the enemy
     bot.lookAt(entity.position);
-    bot.attack(entity, true);
+    
+    // Attack any near target
+    // We need a tiny throttle here too
+    // When there are many it starts to hit everyone
+    // But whether you leave it like this or prevent with 'pvp.target'
+    // it will still be not enough for him to survive.
+    // TODO: Here we have to 'quit' every enemy, and stay away while hitting them
+    // This is really complex, I'll leave it like this for now
+    // TODO: Also jump when attacking for extra crit damage
+    bot.pvp.attack(entity, true);
 }
 
 /**
@@ -56,6 +69,11 @@ export default class Minion {
             // password: '12345678'      // set if you want to use password-based auth (may be unreliable). If specified, the `username` must be an email
         });
         
+        // Web inventory viewer
+        inventoryViewer(bot, {
+            port: 8002
+        });
+        
         /**
          * This reads every chat message
          */
@@ -77,6 +95,7 @@ export default class Minion {
         bot.loadPlugin(pathfinder);
         bot.loadPlugin(AutoEat);
         bot.loadPlugin(armorManager);
+        bot.loadPlugin(pvp);
         
         // View player on the browser
         bot.once('spawn', () => {
@@ -117,16 +136,24 @@ export default class Minion {
             // So to detect phantoms you must use the 'mob' type
             if(entity.type === "hostile") {
                 const distance = bot.entity.position.distanceTo(entity.position);
-                if(distance < 5) {
+                if(distance < DISTANCE_TO_ATTACK) {
                     
-                    console.log(`\n--- Near hostile entity ${entity.displayName} ---`);
-                    console.log(`Entity name: ${entity.name}`);
-                    console.log(`Entity type: `, entity.kind);
+                    // console.log(`\n--- Near hostile entity ${entity.displayName} ---`);
+                    // console.log(`Entity name: ${entity.name}`);
+                    // console.log(`Entity type: `, entity.kind);
                     
-                    console.log(`Distance to entity: `, distance);
+                    // console.log(`Distance to entity: `, distance);
                     
                     attackEntity(bot, entity);
+                } else if(distance < 30) {
+                    // Skeletons and pillagers can shoot at this distance
                 }
+                
+                // Bear in mind shulkers
+                
+                // Blazes and ghasts can shoot from two light years away
+                // (jk, but they are so fukin annoying because they shoot from really far away)
+                
             }
             
             // Check if it's the player
@@ -140,7 +167,7 @@ export default class Minion {
                 // Hostile entity
                 if(entity.name === "phantom") {
                     const distance = bot.entity.position.distanceTo(entity.position);
-                    if(distance < 5) {
+                    if(distance < DISTANCE_TO_ATTACK) {
                         console.log(`\n--- Hostile entity ${entity.displayName} ---`);
                         console.log(`Entity name: ${entity.name}`);
                         console.log(`Entity type: `, entity.kind);
@@ -165,6 +192,7 @@ export default class Minion {
             } else if(entity.type === "object") {
                 console.log(`--- Object ${entity.displayName} ---`);
                 console.log(`Entity name: ${entity.name}`);
+                
             }
         });
         
