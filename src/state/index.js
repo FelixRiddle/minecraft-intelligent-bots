@@ -60,6 +60,12 @@ export default function startStateMachine(bot, minion) {
     // We can start our state machine simply by creating a new instance.
     const stateMachine = new BotStateMachine(bot, rootLayer);
     
+    // Notify the rest of the code that the bot is using a state machine
+    // This is to stop using default actions like autoarmor, auto eating, which are executed anytime.
+    // This is problematic because it would cancel the current action or the bot may try to make a lot of
+    // actions at the same time.
+    bot.stateMachine = stateMachine;
+    
     const webserver = new StateMachineWebserver(bot, stateMachine);
     webserver.startServer();
 }

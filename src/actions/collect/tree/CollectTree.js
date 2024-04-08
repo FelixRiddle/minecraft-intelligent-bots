@@ -1,3 +1,4 @@
+import optionOrOverrided from '../../../lib/optionOrOverrided.js';
 import { getLogBlocks } from '../../../registry/block/logBlock.js';
 import Tree from './Tree.js';
 
@@ -13,11 +14,16 @@ import Tree from './Tree.js';
 export default class CollectTree {
     debug = false;
     
-    constructor(bot, io, autoExecute = true) {
+    constructor(bot, io, options = {
+        autoExecute: true,
+        ioEnabled: true,
+    }) {
         this.bot = bot;
         this.io = io;
+        this.options = options;
         
-        if(autoExecute) {
+        // If settings were overrided
+        if(optionOrOverrided(options, "autoExecute")) {
             this.collectAndPlantTree();
         }
     }
@@ -32,7 +38,10 @@ export default class CollectTree {
         if(!tree) {
             const msg = "Couldn't find a tree nearby!";
             console.error(msg);
-            this.io.error(msg);
+            
+            if(this.options.ioEnabled) {
+                this.io.error(msg);
+            }
         } else {
             // Break tree
             tree.breakTree();
@@ -49,7 +58,11 @@ export default class CollectTree {
         if(!tree) {
             const msg = "Couldn't find a tree nearby!";
             console.error(msg);
-            this.io.error(msg);
+            
+            if(this.options.ioEnabled) {
+                this.io.error(msg);
+            }
+            
             reject();
         } else {
             // Break tree

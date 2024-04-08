@@ -1,4 +1,5 @@
 import MessagePlayer from "../../../../MessagePlayer.js";
+import CollectTree from "../../../collect/tree/CollectTree.js";
 
 /**
  * Find and collect a tree
@@ -17,5 +18,19 @@ import MessagePlayer from "../../../../MessagePlayer.js";
  */
 export default function findAndCollectTree(bot, io) {
     console.log(`[Received command] Find and collect tree`);
+    
+    // Execute collect tree
+    try {
+        const collectTree = new CollectTree(bot, io, {
+            ioEnabled: false,
+        });
+        
+        // Tree collected return
+        return;
+    } catch(err) {
+        // Couldn't collect a tree
+        // Now we do try to find one
+        console.log(`[No tree] Couldn't find a tree, look for one`);
+    }
 }
 
