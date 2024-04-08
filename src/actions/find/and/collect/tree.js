@@ -29,6 +29,7 @@ export default function findAndCollectTree(bot, io) {
             });
             
             // Tree collected return
+            console.log(`[Tree collected] Break loop`);
             return;
         } catch(err) {
             // Couldn't collect a tree
@@ -40,14 +41,21 @@ export default function findAndCollectTree(bot, io) {
         while(true) {
             try {
                 // Move 64 blocks forward
+                
+                
+                // Find tree
                 const treeRadar = new TreeRadar(bot, io, { ioEnabled: false});
                 const treesNearby = treeRadar.treesNearby();
                 if(treesNearby.length > 0) {
+                    console.log(`Tree found, breaking`);
+                    
                     // Great a tree
                     // Collect it
                     const collectTree = new CollectTree(bot, io, {
                         ioEnabled: false,
                     });
+                    
+                    console.log(`[Tree collected] Break loop`);
                     
                     // Tree collected return
                     return;

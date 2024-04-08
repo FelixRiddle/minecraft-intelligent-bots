@@ -1,13 +1,14 @@
 import MessagePlayer from "../MessagePlayer.js";
 
 import Minion from '../Minion.js';
-import CollectTree from "../actions/collect/tree/CollectTree.js";
 import ActionCmd from "./action/ActionCmd.js";
 import InventoryCmd from "./inventory/InventoryCmd.js";
 import startStateMachine from "../state/index.js";
 import condensedInventory from "../view/inventory/condensedInventory.js";
 import collect from "./collect/collectCommand.js";
 import findCommand from "./find/findCommand.js";
+import goCommand from "./go/goCommand.js";
+import closeToPlayerMiddleware from "../middleware/proximity/closeToPlayerMiddleware.js";
 
 /**
  * Game cli
@@ -31,16 +32,9 @@ export default class GameCLI {
         bot.on('whisper', (username, message) => {
             // Some commands may throw an error, but that's okay
             try {
-                
                 // Commander username
                 if(username === this.minion.commanderUsername) {
-                    // Get player
-                    const player = bot.players[username]?.entity;
                     const msgPlayer = new MessagePlayer(bot, username);
-                    if(!player) {
-                        msgPlayer.msg("I can't see you!");
-                        return;
-                    }
                     
                     // Commands
                     // Case insensitive
@@ -52,13 +46,18 @@ export default class GameCLI {
                     
                     // Args for the next command in chain
                     const nextArgs = args.filter((item, index) => index > 0);
-                    
                     const cmd = args[0];
+                    
+                    // Print command
+                    console.log(`[Command] ${cmd}`);
+                    
                     if(cmd === "action") {
                         const action = new ActionCmd(bot, msgPlayer, nextArgs);
                     } else if(cmd === "collect") {
                         collect(bot, msgPlayer, nextArgs);
                     } else if(cmd === "come") {
+                        closeToPlayerMiddleware(bot, msgPlayer, username);
+                        
                         msgPlayer.setOk().msg("Going towards the player");
                         
                         this.minion.goToPlayer(player);
@@ -96,6 +95,7 @@ export default class GameCLI {
                     } else if(cmd === "go") {
                         // Go do something
                         // Go to direction
+                        goCommand(bot, msgPlayer, nextArgs);
                     } else if(cmd === "help") {
                         // Show commands by page
                     } else if(cmd === "inv") {
@@ -124,7 +124,8 @@ export default class GameCLI {
                     }
                 }
             } catch(err) {
-                console.log(`[Error] ${err}`)
+                // console.error(err);
+                console.log(`[Error](That might require attention) ${err}`);
             }
         });
     }

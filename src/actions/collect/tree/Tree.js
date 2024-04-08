@@ -294,7 +294,7 @@ export default class Tree {
                 
             // Equip best item for breaking the block first
             // Which is an axe
-            const axe = obj.bot.pathfinder.bestHarvestTool(log);
+            const axe = obj.bot.pathfinder.bestHarvestTool('oak_log');
             
             // If there's no axe, hit with the hand
             if(axe) {
