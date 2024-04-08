@@ -291,21 +291,20 @@ export default class Tree {
                 console.log(`--- Chopping tree ---`);
                 console.log(`Logs: `, arrBlockView(logs));
             }
+                
+            // Equip best item for breaking the block first
+            // Which is an axe
+            const axe = obj.bot.pathfinder.bestHarvestTool(log);
+            
+            // If there's no axe, hit with the hand
+            if(axe) {
+                equipItemByName(obj.bot, obj.io, axe.name);
+            }
             
             // Iterate over every log and break them all
             for(const log of logs) {
                 if(obj.debug) {
                     console.log(`Current log: `, blockView(log));
-                }
-                
-                // Equip best item for breaking the block first
-                // Which is an axe
-                // The axe may break, so check every time
-                const axe = obj.bot.pathfinder.bestHarvestTool(log);
-                
-                // If there's no axe, hit with the hand
-                if(axe) {
-                    equipItemByName(obj.bot, obj.io, axe.name);
                 }
                 
                 // Check if the block can be broken
