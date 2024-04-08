@@ -2,12 +2,18 @@ import { BehaviorIdle, BehaviorPrintServerStats, BotStateMachine, NestedStateMac
 import GatherWood from "../behavior/inventory/GatherWood.js";
 import PickaxeTier from "../behavior/inventory/PickaxeTier.js";
 import woodAgeStates from "./ages/woodAge/woodAge.js";
+import Minion from "../Minion.js";
+import MessagePlayer from "../MessagePlayer.js";
 
 /**
  * Start state machine
+ * 
+ * @param {Minion} minion 
  */
-export default function startStateMachine(bot) {
-    const targets = {};
+export default function startStateMachine(bot, minion) {
+    const targets = {
+        io: new MessagePlayer(bot, minion.commanderUsername)
+    };
     
     // --- State machine ---
     const idleState = new BehaviorIdle(bot);

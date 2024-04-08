@@ -1,4 +1,5 @@
-import { hasPlanksQuantity } from "../../../operation/inventory/check/hasPlanks.js";
+import hasEnoughWoodForAllTools from "../../../inventory/wood/tools/hasEnoughWoodForAllTools.js";
+import condensedInventory from "../../../view/inventory/condensedInventory.js";
 
 /**
  * Check wood to craft all wooden tools
@@ -15,22 +16,11 @@ export default class CheckWoodenToolsRequirement {
      * On state entered
      */
     onStateEntered() {
-        // Got some planks
-        // Check quantity
-        // We have got to make sticks for each tool
-        const sword = 2;
-        const pickaxe = 3;
-        const axe = 3;
-        const hoe = 2;
-        const shovel = 1;
+        console.log(`[State(${this.stateName})]`);
+        console.log(`Inventory: `, condensedInventory(this.bot));
         
-        // 9 Sticks required
-        // 6 planks to make 12 sticks
-        const sticks = 6;
-        // 17
-        const totalPlanksRequired = sword + pickaxe + axe + hoe + shovel + sticks;
+        const woodOk = hasEnoughWoodForAllTools(this.bot);
         
-        const woodOk = hasPlanksQuantity(this.bot, totalPlanksRequired);
         this.targets.canCraftWoodenTools = woodOk;
     }
     

@@ -7,7 +7,6 @@ import { isPlank } from "../../../inventory/wood/index.js";
  */
 export function hasPlanksQuantity(bot, planksRequired = 32) {
     const inv = bot.inventory;
-    console.log(`Inventory: `, inv.items());
     
     for(const item in inv.items()) {
         if(isPlank(item)) {

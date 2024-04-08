@@ -6,7 +6,6 @@
  */
 export function hasWoodQuantity(bot, woodLogsRequired = 8) {
     const inv = bot.inventory;
-    console.log(`Inventory: `, inv.items());
     
     for(const item in inv.items()) {
         if(isLog(item)) {

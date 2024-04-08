@@ -13,11 +13,13 @@ import Tree from './Tree.js';
 export default class CollectTree {
     debug = false;
     
-    constructor(bot, io) {
+    constructor(bot, io, autoExecute = true) {
         this.bot = bot;
         this.io = io;
         
-        this.collectAndPlantTree();
+        if(autoExecute) {
+            this.collectAndPlantTree();
+        }
     }
     
     /**
@@ -34,6 +36,25 @@ export default class CollectTree {
         } else {
             // Break tree
             tree.breakTree();
+        }
+    }
+    
+    /**
+     * Collect and plant tree promisified
+     */
+    async collectAndPlantTreePromise(resolve, reject) {
+        const trees = this.findTrees();
+        const tree = trees[0];
+        
+        if(!tree) {
+            const msg = "Couldn't find a tree nearby!";
+            console.error(msg);
+            this.io.error(msg);
+            reject();
+        } else {
+            // Break tree
+            tree.breakTree();
+            resolve();
         }
     }
     

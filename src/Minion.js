@@ -106,7 +106,7 @@ export default class Minion {
                 bannedFood: [],
             };
             
-            startStateMachine(this.bot);
+            // startStateMachine(this.bot, this);
         });
         
         bot.on('health', async () => {

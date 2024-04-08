@@ -1,8 +1,7 @@
 import { BehaviorIdle, NestedStateMachine, StateTransition } from "mineflayer-statemachine";
 
-import GatherWood from "../../../behavior/inventory/GatherWood.js";
-import PickaxeTier from "../../../behavior/inventory/PickaxeTier.js";
 import CheckWoodenToolsRequirement from "../../../behavior/ages/woodAge/CheckWoodenToolsRequirement.js";
+import gatherWood from "../../gather/gatherWood.js";
 
 /**
  * Wood age stages
@@ -10,9 +9,10 @@ import CheckWoodenToolsRequirement from "../../../behavior/ages/woodAge/CheckWoo
 export default function woodAgeStates(bot, targets = {}) {
     
     const idleState = new BehaviorIdle(bot);
-    const gatherWood = new GatherWood(bot, targets);
     const woodRequired = new CheckWoodenToolsRequirement(bot, targets);
-    const pickaxeTier = new PickaxeTier(bot, targets);
+    
+    // Forgot to call this bad boy 😡😡😡😡
+    const gatherWoodArc = gatherWood(bot, targets, 5);
     
     const stateName = '[Wood age arc] ';
     
@@ -50,8 +50,8 @@ export default function woodAgeStates(bot, targets = {}) {
         // No wood, go find wood
         new StateTransition({
             parent: woodRequired,
-            child: gatherWood,
-            name: 'gatherWood',
+            child: gatherWoodArc,
+            name: 'gatherWoodArc',
             // Check if we've got enough
             shouldTransition: () => true,
             onTransition: () => console.log(`${stateName}Gather wood`),

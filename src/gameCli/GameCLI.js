@@ -5,6 +5,7 @@ import CollectTree from "../actions/collect/tree/CollectTree.js";
 import ActionCmd from "./action/ActionCmd.js";
 import InventoryCmd from "./inventory/InventoryCmd.js";
 import startStateMachine from "../state/index.js";
+import condensedInventory from "../view/inventory/condensedInventory.js";
 
 /**
  * Game cli
@@ -54,6 +55,8 @@ export default class GameCLI {
                     const arg = args[1];
                     if(arg === "tree") {
                         const collectTree = new CollectTree(bot, msgPlayer);
+                    } else if(arg === "and") {
+                        // Collect and do something else
                     }
                 } else if(cmd === "come") {
                     msgPlayer.setOk().msg("Going towards the player");
@@ -75,7 +78,7 @@ export default class GameCLI {
                     const arg = args[1];
                     // Enable state machine
                     if(arg === "state") {
-                        startStateMachine(this.bot);
+                        startStateMachine(this.bot, this.minion);
                     }
                 } else if(cmd === "follow") {
                     // Enable the first bit
@@ -98,12 +101,13 @@ export default class GameCLI {
                 } else if(cmd === "list") {
                     const arg = args[1];
                     if(arg === "items") {
-                        // List items
-                        const items = this.bot.inventory.items();
-                        const output = items
-                            .map((item) => `${item.displayName}(${item.count})`)
-                            .join(', ');
-                        const out = `[${output}]`;
+                        // // List items
+                        // const items = this.bot.inventory.items();
+                        // const output = items
+                        //     .map((item) => `${item.displayName}(${item.count})`)
+                        //     .join(', ');
+                        // const out = `[${output}]`;
+                        const out = condensedInventory(this.bot);
                         msgPlayer.setOk().msg(out);
                     }
                 } else if(cmd.startsWith("setRole")) {
