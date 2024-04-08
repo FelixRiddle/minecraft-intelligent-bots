@@ -17,20 +17,28 @@ import CollectTree from "../../../collect/tree/CollectTree.js";
  * @param {MessagePlayer} io 
  */
 export default function findAndCollectTree(bot, io) {
-    console.log(`[Received command] Find and collect tree`);
-    
-    // Execute collect tree
+    // If it fails here, it's a real fail
     try {
-        const collectTree = new CollectTree(bot, io, {
-            ioEnabled: false,
-        });
+        console.log(`[Received command] Find and collect tree`);
         
-        // Tree collected return
-        return;
+        // Execute collect tree
+        try {
+            const collectTree = new CollectTree(bot, io, {
+                ioEnabled: false,
+            });
+            
+            // Tree collected return
+            return;
+        } catch(err) {
+            // Couldn't collect a tree
+            // Now we do try to find one
+            console.log(`[No tree] Couldn't find a tree, look for one`);
+        }
     } catch(err) {
-        // Couldn't collect a tree
-        // Now we do try to find one
-        console.log(`[No tree] Couldn't find a tree, look for one`);
+        // It would be weird that an error gets to this place, but just in case we handle it now
+        const msg = "Couldn't find and collect a tree";
+        console.log(`[Error] ${msg}`);
+        io.error(msg);
     }
 }
 

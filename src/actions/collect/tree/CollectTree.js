@@ -10,6 +10,8 @@ import Tree from './Tree.js';
  * 2) Go to tree
  * 3) Chop tree
  * 4) Plant sapling on the same spot(This is the non-destructive part)
+ * 
+ * I didn't know before but this acts like a state machine
  */
 export default class CollectTree {
     debug = false;
@@ -42,6 +44,9 @@ export default class CollectTree {
             if(this.options.ioEnabled) {
                 this.io.error(msg);
             }
+            
+            // Throw an error
+            throw Error("Couldn't find a tree nearby");
         } else {
             // Break tree
             tree.breakTree();

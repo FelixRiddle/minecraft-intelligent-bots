@@ -27,6 +27,16 @@ Display bot hunger
 
 Enable survival state machine, the bot will start gathering items and tools.
 
+# find and collect tree
+
+Find and collects a tree.
+
+It will go on searching forever until one is found.
+
+```
+/w jimmy find and collect tree
+```
+
 # follow
 
 Follows the player
