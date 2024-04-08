@@ -104,7 +104,7 @@ export default class GameCLI {
                         const arg = args[1];
                         if(arg === "items") {
                             // List items
-                            const out = condensedInventory(this.bot);
+                            const out = condensedInventory(bot);
                             msgPlayer.setOk().msg(out);
                         }
                     } else if(cmd.startsWith("setRole")) {
@@ -124,7 +124,7 @@ export default class GameCLI {
                     }
                 }
             } catch(err) {
-                // console.error(err);
+                console.error(err);
                 console.log(`[Error](That might require attention) ${err}`);
             }
         });
