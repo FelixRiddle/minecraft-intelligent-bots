@@ -1,5 +1,6 @@
 import MessagePlayer from "../../../../MessagePlayer.js";
 import CollectTree from "../../../collect/tree/CollectTree.js";
+import TreeRadar from "../../../radar/TreeRadar.js";
 
 /**
  * Find and collect a tree
@@ -34,6 +35,28 @@ export default function findAndCollectTree(bot, io) {
             // Now we do try to find one
             console.log(`[No tree] Couldn't find a tree, look for one`);
         }
+        
+        // Look for a tree forever
+        while(true) {
+            try {
+                // Move 64 blocks forward
+                const treeRadar = new TreeRadar(bot, io, { ioEnabled: false});
+                const treesNearby = treeRadar.treesNearby();
+                if(treesNearby.length > 0) {
+                    // Great a tree
+                    // Collect it
+                    const collectTree = new CollectTree(bot, io, {
+                        ioEnabled: false,
+                    });
+                    
+                    // Tree collected return
+                    return;
+                }
+            } catch(err) {
+                
+            }
+        }
+        
     } catch(err) {
         // It would be weird that an error gets to this place, but just in case we handle it now
         const msg = "Couldn't find and collect a tree";

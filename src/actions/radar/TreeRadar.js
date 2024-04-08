@@ -1,24 +1,16 @@
-import optionOrDefault from '../../../lib/option/optionOrDefault.js';
-import optionOrOverrided from '../../../lib/option/optionOrOverrided.js';
-import { getLogBlocks } from '../../../registry/block/logBlock.js';
-import Tree from './Tree.js';
+import optionOrDefault from "../../lib/option/optionOrDefault.js";
+import { getLogBlocks } from "../../registry/block/logBlock.js";
+import Tree from "../collect/tree/Tree.js";
 
 /**
- * Non-destructive way to collect trees
+ * Tree radar
  * 
- * Actions:
- * 1) Bot looks and finds a tree
- * 2) Go to tree
- * 3) Chop tree
- * 4) Plant sapling on the same spot(This is the non-destructive part)
- * 
- * I didn't know before but this acts like a state machine
+ * Pretty much the same as collect tree, except that we don't collect it hehe
  */
-export default class CollectTree {
+export default class TreeRadar {
     debug = false;
     
     constructor(bot, io, options = {
-        autoExecute: true,
         ioEnabled: true,
         range: 32,
     }) {
@@ -30,17 +22,12 @@ export default class CollectTree {
         options.range = optionOrDefault(options, 'range', 32);
         options.ioEnabled = optionOrDefault(options, 'ioEnabled', true);
         this.options = options;
-        
-        // If settings were overrided
-        if(optionOrOverrided(options, "autoExecute")) {
-            this.collectAndPlantTree();
-        }
     }
     
     /**
-     * Collect and plant tree
+     * Get trees nearby
      */
-    collectAndPlantTree() {
+    treesNearby() {
         const trees = this.findTrees();
         const tree = trees[0];
         
@@ -54,33 +41,9 @@ export default class CollectTree {
             
             // Throw an error
             throw Error("Couldn't find a tree nearby");
-        } else {
-            // Break tree
-            tree.breakTree();
         }
-    }
-    
-    /**
-     * Collect and plant tree promisified
-     */
-    async collectAndPlantTreePromise(resolve, reject) {
-        const trees = this.findTrees();
-        const tree = trees[0];
         
-        if(!tree) {
-            const msg = "Couldn't find a tree nearby!";
-            console.error(msg);
-            
-            if(this.options.ioEnabled) {
-                this.io.error(msg);
-            }
-            
-            reject();
-        } else {
-            // Break tree
-            tree.breakTree();
-            resolve();
-        }
+        return trees;
     }
     
     /**
