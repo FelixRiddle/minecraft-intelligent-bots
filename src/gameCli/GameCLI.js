@@ -6,6 +6,8 @@ import ActionCmd from "./action/ActionCmd.js";
 import InventoryCmd from "./inventory/InventoryCmd.js";
 import startStateMachine from "../state/index.js";
 import condensedInventory from "../view/inventory/condensedInventory.js";
+import collect from "./collect/collectCommand.js";
+import findCommand from "./find/findCommand.js";
 
 /**
  * Game cli
@@ -52,12 +54,7 @@ export default class GameCLI {
                 if(cmd === "action") {
                     const action = new ActionCmd(bot, msgPlayer, nextArgs);
                 } else if(cmd === "collect") {
-                    const arg = args[1];
-                    if(arg === "tree") {
-                        const collectTree = new CollectTree(bot, msgPlayer);
-                    } else if(arg === "and") {
-                        // Collect and do something else
-                    }
+                    collect(bot, msgPlayer, nextArgs);
                 } else if(cmd === "come") {
                     msgPlayer.setOk().msg("Going towards the player");
                     
@@ -80,6 +77,8 @@ export default class GameCLI {
                     if(arg === "state") {
                         startStateMachine(this.bot, this.minion);
                     }
+                } else if(cmd === "find") {
+                    findCommand(bot, msgPlayer, nextArgs);
                 } else if(cmd === "follow") {
                     // Enable the first bit
                     this.minion.toggleFollowPlayer();

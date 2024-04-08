@@ -1,3 +1,5 @@
+import MessagePlayer from "../../../../MessagePlayer.js";
+
 /**
  * Find and collect a tree
  * 
@@ -10,8 +12,10 @@
  * Integrated state machine.
  * 
  * This creates and uses an internal state machine.
+ * 
+ * @param {MessagePlayer} io 
  */
-export default function findAndCollectTree() {
-    
+export default function findAndCollectTree(bot, io) {
+    console.log(`[Received command] Find and collect tree`);
 }
 
