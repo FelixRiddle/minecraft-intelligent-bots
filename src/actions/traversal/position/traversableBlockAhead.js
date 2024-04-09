@@ -33,6 +33,13 @@ export function blockExistsAbove(bot, block, blockName, options = {
  * 
  * This gives a block ahead of the player in the x direction
  * If the path is obstructed it will throw an error
+ * 
+ * Doesn't work with water, maybe can be fixed if when you detect that the last block is water
+ * instead of stopping there add another 32 blocks, until you reach the end.
+ * 
+ * But the player(bot) has limited vision so you can't go all the way
+ * 
+ * This is a stupid algorithm because it has many errors, probably for a low memory consumption bot.
  */
 export default function traversableBlockAheadXDirection(bot, options = {
     range: 32,
