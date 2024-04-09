@@ -64,5 +64,39 @@ export default function goCommand(bot, io, args) {
             
             io.ok("Walked 32 blocks in z direction");
         }
+    } else if(arg === "xz") {
+        const nextArg = args[1];
+        if(!nextArg) {
+            // Traverse z
+            const trav = new TraverseAny(bot, io, { directionX: 1, directionZ: 1 });
+            const blockAhead = trav.traversableBlock();
+            
+            // Get block position
+            const { x, y, z } = blockAhead.position;
+            
+            // Walk towards the player
+            const defaultMove = new Movements(bot);
+            bot.pathfinder.setMovements(defaultMove);
+            bot.pathfinder.setGoal(new GoalNear(x, y, z, 0));
+            
+            io.ok("Walked 32 blocks in xz direction");
+        }
+    } else if(arg === "-xz") {
+        const nextArg = args[1];
+        if(!nextArg) {
+            // Traverse z
+            const trav = new TraverseAny(bot, io, { directionX: -1, directionZ: -1 });
+            const blockAhead = trav.traversableBlock();
+            
+            // Get block position
+            const { x, y, z } = blockAhead.position;
+            
+            // Walk towards the player
+            const defaultMove = new Movements(bot);
+            bot.pathfinder.setMovements(defaultMove);
+            bot.pathfinder.setGoal(new GoalNear(x, y, z, 0));
+            
+            io.ok("Walked 32 blocks in xz direction");
+        }
     }
 }

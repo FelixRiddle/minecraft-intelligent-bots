@@ -11,6 +11,9 @@ import optionOrDefault from "../../../lib/option/optionOrDefault.js";
  * - Traverse in any direction
  * Can also go diagonally
  * Uses mineflayer pathfinder
+ * 
+ * - Get block at the correct height
+ * When checking for height get the highest block or the lowest block
  */
 export default class TraverseAny {
     constructor(bot, io, options = {
@@ -45,26 +48,55 @@ export default class TraverseAny {
     }
     
     /**
-     * Check blocks above
-     * 
-     * Check a given block above a position, and if it's not found throw an error
+     * Checks for a surface block at an optimal height
      */
-    blockExistsAbove(block, blockName) {
+    getOptimalSurfaceBlock(block, blockName = "air") {
         const pos = block.position;
         
-        // Use max height
-        for(let i = 0; i < this.options.maxHeight; i++) {
-            const block = this.bot.blockAt(vec3(pos.x, pos.y + i, pos.z));
+        // If the block is air go down
+        let lastBlock = block;
+        if(block.name === blockName) {
+            // Here we're in the air, and we're looking for a solid block
+            console.log(`Looking for a ground block`);
             
-            // Check if it's the block
-            if(block.name === blockName) {
-                // Return
-                return true;
+            // Use negative max height
+            for(let i = 0; i < -this.options.maxHeight; i++) {
+                const block = this.bot.blockAt(vec3(pos.x, pos.y + i, pos.z));
+                
+                // We've got to the the exact opposite
+                // Check for air blocks until we get one that's not air
+                // Check if it's NOT the block
+                if(!(block.name === blockName)) {
+                    console.log(`Ground block found: `, block);
+                    
+                    // Return
+                    return lastBlock;
+                }
+                
+                lastBlock = block;
+            }
+        } else {
+            // Here we're looking for an air block
+            console.log(`Looking for air block`);
+            
+            // Use max height
+            for(let i = 0; i < this.options.maxHeight; i++) {
+                const block = this.bot.blockAt(vec3(pos.x, pos.y + i, pos.z));
+                
+                // Check if it's the block
+                if(block.name === blockName) {
+                    console.log(`Air block found: `, block);
+                    
+                    // Return
+                    return block;
+                }
+                
+                lastBlock = block;
             }
         }
         
         // Block not found
-        return false;
+        return undefined;
     }
     
     /**
@@ -107,7 +139,7 @@ export default class TraverseAny {
             // console.log(`Current block: `, block);
             
             // Validate that there's air above
-            const airAbove = this.blockExistsAbove(block, 'air');
+            const airAbove = this.getOptimalSurfaceBlock(block, 'air');
             
             // If there's no air, we will consider this as untraversable
             if(!airAbove) {
