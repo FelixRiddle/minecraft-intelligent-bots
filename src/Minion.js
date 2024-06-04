@@ -12,7 +12,6 @@ import { plugin as pvp } from "mineflayer-pvp";
 import { bit_toggle, bit_test } from "./bit.js";
 import GameCLI from "./gameCli/GameCLI.js";
 import goTowardsEntity from './operation/movement/goTowardsEntity.js';
-import startStateMachine from './state/index.js';
 
 const { GoalNear } = Pathfinder.goals;
 
